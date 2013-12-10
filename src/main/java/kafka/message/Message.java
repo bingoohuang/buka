@@ -1,6 +1,5 @@
 package kafka.message;
 
-import kafka.common.InvalidMessageException;
 import kafka.utils.Utils;
 
 import java.nio.ByteBuffer;

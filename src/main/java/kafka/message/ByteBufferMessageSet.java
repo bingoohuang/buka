@@ -1,7 +1,6 @@
 package kafka.message;
 
 import com.google.common.collect.Lists;
-import kafka.common.InvalidMessageException;
 import kafka.common.KafkaException;
 import kafka.utils.IteratorTemplate;
 
@@ -30,6 +29,9 @@ public class ByteBufferMessageSet extends MessageSet {
 
     private int shallowValidByteCount = -1;
 
+    public ByteBufferMessageSet(CompressionCodec compressionCodec, Message... messages) {
+        this(compressionCodec, Lists.newArrayList(messages));
+    }
     public ByteBufferMessageSet(CompressionCodec compressionCodec, List<Message> messages) {
         this(ByteBufferMessageSets.create(new AtomicLong(0), compressionCodec, messages));
     }
@@ -157,7 +159,7 @@ public class ByteBufferMessageSet extends MessageSet {
      * Update the offsets for this message set. This method attempts to do an in-place conversion
      * if there is no compression, but otherwise recopies the messages
      */
-    private ByteBufferMessageSet assignOffsets(AtomicLong offsetCounter, CompressionCodec codec) {
+    public ByteBufferMessageSet assignOffsets(AtomicLong offsetCounter, CompressionCodec codec) {
         if (codec == NoCompressionCodec.instance) {
             // do an in-place conversion
             int position = 0;

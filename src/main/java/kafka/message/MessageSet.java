@@ -1,7 +1,5 @@
 package kafka.message;
 
-import kafka.common.InvalidMessageException;
-
 import java.nio.channels.GatheringByteChannel;
 import java.util.Iterator;
 

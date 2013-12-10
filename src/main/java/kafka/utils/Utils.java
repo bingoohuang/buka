@@ -628,4 +628,44 @@ public abstract class Utils {
             lock.unlock();
         }
     }
+
+    public static void readChannel(FileChannel channel, ByteBuffer buffer, int position) {
+        try {
+            channel.read(buffer, position);
+        } catch (IOException e) {
+            throw new KafkaException(e);
+        }
+    }
+
+    public static void force(FileChannel channel, boolean metaData) {
+        try {
+            channel.force(metaData);
+        } catch (IOException e) {
+            throw new KafkaException(e);
+        }
+    }
+
+    public static void truncate(FileChannel channel, int targetSize) {
+        try {
+            channel.truncate(targetSize);
+        } catch (IOException e) {
+            throw new KafkaException(e);
+        }
+    }
+
+    public static void position(FileChannel channel, int targetSize) {
+        try {
+            channel.position(targetSize);
+        } catch (IOException e) {
+            throw new KafkaException(e);
+        }
+    }
+
+    public static void read(FileChannel channel, ByteBuffer buffer, int position) {
+        try {
+            channel.read(buffer, position);
+        } catch (IOException e) {
+            throw new KafkaException(e);
+        }
+    }
 }
