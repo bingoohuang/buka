@@ -668,4 +668,11 @@ public abstract class Utils {
             throw new KafkaException(e);
         }
     }
+
+    public static <K, V> Tuple2<K, V> head(Map<K, V> map) {
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            return Tuple2.make(entry.getKey(), entry.getValue());
+        }
+        return null;
+    }
 }
