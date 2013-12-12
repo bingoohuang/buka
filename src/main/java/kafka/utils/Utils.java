@@ -3,8 +3,6 @@ package kafka.utils;
 import com.google.common.collect.*;
 import kafka.common.KafkaException;
 import kafka.common.KafkaStorageException;
-import kafka.common.TopicAndPartition;
-import kafka.message.ByteBufferMessageSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -801,15 +799,33 @@ public abstract class Utils {
 
     }
 
-    public static <K,V> void foreach(Map<K,V> map, Function2<K,V,Void> func) {
-        for(Map.Entry<K, V> entry : map.entrySet()) {
+    public static <K, V> void foreach(Map<K, V> map, Function2<K, V, Void> func) {
+        for (Map.Entry<K, V> entry : map.entrySet()) {
             func.apply(entry.getKey(), entry.getValue());
         }
     }
 
-    public static <V> void foreach(Collection<V> coll, Function1<V,Void> func) {
-        for(V v : coll) {
+    public static <V> void foreach(Collection<V> coll, Function1<V, Void> func) {
+        for (V v : coll) {
             func.apply(v);
         }
+    }
+
+    public static <T> List<T> flatList(int from, int count, Function1<Integer, T> fun) {
+        List<T> ret = Lists.newArrayList();
+        for (int i = from; i < from + count; ++i) {
+            ret.add(fun.apply(i));
+        }
+
+        return ret;
+    }
+
+    public static <T> Set<T> flatSet(int from, int count, Function1<Integer, T> fun) {
+        Set<T> ret = Sets.newHashSet();
+        for (int i = from; i < from + count; ++i) {
+            ret.add(fun.apply(i));
+        }
+
+        return ret;
     }
 }

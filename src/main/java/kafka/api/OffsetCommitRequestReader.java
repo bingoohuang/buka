@@ -1,12 +1,54 @@
 package kafka.api;
 
-import java.nio.ByteBuffer;
+import com.google.common.collect.ImmutableMap;
+import kafka.common.OffsetMetadataAndError;
+import kafka.common.TopicAndPartition;
+import kafka.utils.Function0;
+import kafka.utils.Utils;
 
-public class OffsetCommitRequestReader implements RequestReader{
+import java.nio.ByteBuffer;
+import java.util.Map;
+
+import static kafka.api.ApiUtils.readShortString;
+
+public class OffsetCommitRequestReader implements RequestReader {
     public static final RequestReader instance = new OffsetCommitRequestReader();
 
+    public static short CurrentVersion = 0;
+    public static String DefaultClientId = "";
+
     @Override
-    public RequestOrResponse readFrom(ByteBuffer buffer) {
-        return null;
+    public RequestOrResponse readFrom(final ByteBuffer buffer) {
+        // Read values from the envelope
+        short versionId = buffer.getShort();
+        int correlationId = buffer.getInt();
+        String clientId = readShortString(buffer);
+
+        // Read the OffsetRequest
+        String consumerGroupId = readShortString(buffer);
+        int topicCount = buffer.getInt();
+        Map<TopicAndPartition, OffsetMetadataAndError> pairs = Utils.flatMap(1, topicCount, new Function0<Map<TopicAndPartition, OffsetMetadataAndError>>() {
+            @Override
+            public Map<TopicAndPartition, OffsetMetadataAndError> apply() {
+                final String topic = readShortString(buffer);
+                int partitionCount = buffer.getInt();
+
+                return Utils.flatMap(1, partitionCount, new Function0<Map<TopicAndPartition, OffsetMetadataAndError>>() {
+                    @Override
+                    public Map<TopicAndPartition, OffsetMetadataAndError> apply() {
+                        int partitionId = buffer.getInt();
+                        long offset = buffer.getLong();
+                        String metadata = readShortString(buffer);
+
+                        return ImmutableMap.of(
+                                new TopicAndPartition(topic, partitionId),
+                                new OffsetMetadataAndError(offset, metadata)
+                        );
+                    }
+                });
+            }
+        });
+
+        return new OffsetCommitRequest(consumerGroupId, pairs, versionId, correlationId, clientId);
     }
 }
