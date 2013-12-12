@@ -18,4 +18,8 @@ public class KafkaException extends RuntimeException {
     public KafkaException(IOException e) {
         super(e);
     }
+
+    public KafkaException(Throwable e) {
+        super(e);
+    }
 }

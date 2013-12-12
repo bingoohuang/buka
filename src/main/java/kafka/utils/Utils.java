@@ -1,8 +1,10 @@
 package kafka.utils;
 
-import com.google.common.collect.Iterables;
+import com.google.common.collect.*;
 import kafka.common.KafkaException;
 import kafka.common.KafkaStorageException;
+import kafka.common.TopicAndPartition;
+import kafka.message.ByteBufferMessageSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +16,7 @@ import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -674,5 +677,139 @@ public abstract class Utils {
             return Tuple2.make(entry.getKey(), entry.getValue());
         }
         return null;
+    }
+
+    public static <S> S head(List<S> current) {
+        return current != null && current.size() > 0 ? current.get(0) : null;
+    }
+
+    public static <S> List<S> tail(List<S> current) {
+        return current != null && current.size() > 1 ? current.subList(1, current.size()) : null;
+    }
+
+    public static long write(GatheringByteChannel channel, ByteBuffer... byteBuffers) {
+        try {
+            return channel.write(byteBuffers);
+        } catch (IOException e) {
+            throw new KafkaException(e);
+        }
+    }
+
+    public static <T, K, V> Table<T, K, V> groupBy(
+            Map<K, V> map, Function2<K, V, T> function) {
+
+        Table<T, K, V> result = HashBasedTable.create();
+
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            result.put(function.apply(entry.getKey(), entry.getValue()), entry.getKey(), entry.getValue());
+        }
+
+        return result;
+    }
+
+    public static <T, K, V, R> R foldLeft(Table<T, K, V> table, R initValue, Function3<R, T, Map<K, V>, R> foldFunction) {
+        R foldingValue = initValue;
+        for (T t : table.rowKeySet()) {
+            Map<K, V> column = table.row(t);
+
+            foldingValue = foldFunction.apply(foldingValue, t, column);
+        }
+
+        return foldingValue;
+    }
+
+    public static <K, V, R> R foldLeft(Map<K, V> map, R initValue, Function3<R, K, V, R> foldFunction) {
+        R foldingValue = initValue;
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            foldingValue = foldFunction.apply(foldingValue, entry.getKey(), entry.getValue());
+        }
+
+        return foldingValue;
+    }
+
+    public static <T, R> R foldLeft(Collection<T> values, R initValue, Function2<R, T, R> foldFunction) {
+        R foldingValue = initValue;
+        for (T value : values) {
+            foldingValue = foldFunction.apply(foldingValue, value);
+        }
+
+        return foldingValue;
+    }
+
+    public static <T> boolean exists(Collection<T> values, Function1<T, Boolean> existsFunc) {
+        for (T value : values) {
+            if (existsFunc.apply(value)) return true;
+        }
+
+        return false;
+    }
+
+    public static <K, V, K1, V1> Map<K1, V1> map(Map<K, V> map, Function2<K, V, Tuple2<K1, V1>> func) {
+        Map<K1, V1> ret = Maps.newHashMap();
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            Tuple2<K1, V1> tuple = func.apply(entry.getKey(), entry.getValue());
+            ret.put(tuple._1, tuple._2);
+        }
+        return ret;
+    }
+
+    public static <K, V, V1> List<V1> mapList(Map<K, V> map, Function2<K, V, V1> func) {
+        List<V1> v1s = Lists.newArrayList();
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            V1 v1 = func.apply(entry.getKey(), entry.getValue());
+            v1s.add(v1);
+        }
+        return v1s;
+    }
+
+    public static <R, C, V, V1> List<V1> mapList(Table<R, C, V> map, Function2<R, Map<C, V>, V1> func) {
+        List<V1> v1s = Lists.newArrayList();
+        for (R row : map.rowKeySet()) {
+            Map<C, V> rowValue = map.row(row);
+            V1 v1 = func.apply(row, rowValue);
+            v1s.add(v1);
+        }
+        return v1s;
+    }
+
+    public static <K, V> Map<K, V> flatMap(int from, int count, Function0<Map<K, V>> func) {
+        Map<K, V> map = Maps.newHashMap();
+
+        for (int i = from; i < from + count; ++i) {
+            Map<K, V> apply = func.apply();
+            map.putAll(apply);
+        }
+
+        return map;
+    }
+
+    public static <K, V> Map<K, V> map(int from, int count, Function0<Tuple2<K, V>> func) {
+        Map<K, V> map = Maps.newHashMap();
+
+        for (int i = from; i < from + count; ++i) {
+            Tuple2<K, V> apply = func.apply();
+            map.put(apply._1, apply._2);
+        }
+
+        return map;
+    }
+
+    public static <K, K1, V> void foreach(Table<K1, K, V> table, Function2<K1, Map<K, V>, Void> func) {
+        for (K1 row : table.rowKeySet()) {
+            func.apply(row, table.row(row));
+        }
+
+    }
+
+    public static <K,V> void foreach(Map<K,V> map, Function2<K,V,Void> func) {
+        for(Map.Entry<K, V> entry : map.entrySet()) {
+            func.apply(entry.getKey(), entry.getValue());
+        }
+    }
+
+    public static <V> void foreach(Collection<V> coll, Function1<V,Void> func) {
+        for(V v : coll) {
+            func.apply(v);
+        }
     }
 }

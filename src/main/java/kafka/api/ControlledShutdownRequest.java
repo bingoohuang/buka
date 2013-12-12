@@ -3,7 +3,10 @@ package kafka.api;
 import com.google.common.collect.Sets;
 import kafka.common.ErrorMapping;
 import kafka.common.TopicAndPartition;
+import kafka.network.BoundedByteBufferSend;
+import kafka.network.Request;
 import kafka.network.RequestChannel;
+import kafka.network.Response;
 
 import java.nio.ByteBuffer;
 
@@ -19,7 +22,7 @@ public class ControlledShutdownRequest extends RequestOrResponse {
     }
 
     public ControlledShutdownRequest(int correlationId, int brokerId) {
-            this(ControlledShutdownRequestReader.CurrentVersion, correlationId, brokerId);
+        this(ControlledShutdownRequestReader.CurrentVersion, correlationId, brokerId);
     }
 
     public void writeTo(ByteBuffer buffer) {
@@ -29,7 +32,7 @@ public class ControlledShutdownRequest extends RequestOrResponse {
     }
 
     public int sizeInBytes() {
-        return  2 +  /* version id */
+        return 2 +  /* version id */
                 4 + /* correlation id */
                 4 /* broker id */;
     }
@@ -44,10 +47,10 @@ public class ControlledShutdownRequest extends RequestOrResponse {
         return controlledShutdownRequest.toString();
     }
 
-//    @Override
-//    public void handleError(Throwable e, RequestChannel requestChannel, Request request) {
-//        ControlledShutdownResponse errorResponse =
-//                new ControlledShutdownResponse(correlationId, ErrorMapping.codeFor(e.getClass()), Sets.<TopicAndPartition>newHashSet())
-//        requestChannel.sendResponse(new Response(request, new BoundedByteBufferSend(errorResponse)))
-//    }
+    @Override
+    public void handleError(Throwable e, RequestChannel requestChannel, Request request) {
+        ControlledShutdownResponse errorResponse =
+                new ControlledShutdownResponse(correlationId, ErrorMapping.codeFor(e.getClass()), Sets.<TopicAndPartition>newHashSet());
+        requestChannel.sendResponse(new Response(request, new BoundedByteBufferSend(errorResponse)));
+    }
 }

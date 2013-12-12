@@ -1,5 +1,6 @@
 package kafka.api;
 
+import kafka.network.Request;
 import kafka.network.RequestChannel;
 
 import java.nio.ByteBuffer;
