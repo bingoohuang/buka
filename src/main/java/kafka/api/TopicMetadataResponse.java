@@ -3,10 +3,7 @@ package kafka.api;
 import com.google.common.collect.Lists;
 import kafka.cluster.Broker;
 import kafka.cluster.Brokers;
-import kafka.utils.Function1;
-import kafka.utils.Function2;
-import kafka.utils.Tuple2;
-import kafka.utils.Utils;
+import kafka.utils.*;
 
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -75,21 +72,19 @@ public class TopicMetadataResponse extends RequestOrResponse {
     /* brokers */
         Collection<Broker> brokers = extractBrokers(topicsMetadata).values();
         buffer.putInt(brokers.size());
-        Utils.foreach(brokers, new Function1<Broker, Void>() {
+        Utils.foreach(brokers, new Callable1<Broker>() {
             @Override
-            public Void apply(Broker _) {
+            public void apply(Broker _) {
                 _.writeTo(buffer);
-                return null;
             }
         });
     /* topic metadata */
         buffer.putInt(topicsMetadata.size());
 
-        Utils.foreach(topicsMetadata, new Function1<TopicMetadata, Void>() {
+        Utils.foreach(topicsMetadata, new Callable1<TopicMetadata>() {
             @Override
-            public Void apply(TopicMetadata _) {
+            public void apply(TopicMetadata _) {
                 _.writeTo(buffer);
-                return null;
             }
         });
     }

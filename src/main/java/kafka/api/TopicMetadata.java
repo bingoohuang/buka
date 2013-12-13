@@ -2,10 +2,7 @@ package kafka.api;
 
 import kafka.cluster.Broker;
 import kafka.common.ErrorMapping;
-import kafka.utils.Function1;
-import kafka.utils.Function2;
-import kafka.utils.Range;
-import kafka.utils.Utils;
+import kafka.utils.*;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -64,11 +61,10 @@ public class TopicMetadata {
     /* number of partitions */
         buffer.putInt(partitionsMetadata.size());
 
-        Utils.foreach(partitionsMetadata, new Function1<PartitionMetadata, Void>() {
+        Utils.foreach(partitionsMetadata, new Callable1<PartitionMetadata>() {
             @Override
-            public Void apply(PartitionMetadata arg) {
+            public void apply(PartitionMetadata arg) {
                 arg.writeTo(buffer);
-                return null;
             }
         });
     }
@@ -78,9 +74,9 @@ public class TopicMetadata {
         final StringBuilder topicMetadataInfo = new StringBuilder();
         topicMetadataInfo.append(String.format("{TopicMetadata for topic %s -> ", topic));
         if (errorCode == ErrorMapping.NoError) {
-            Utils.foreach(partitionsMetadata, new Function1<PartitionMetadata, Void>() {
+            Utils.foreach(partitionsMetadata, new Callable1<PartitionMetadata>() {
                 @Override
-                public Void apply(PartitionMetadata partitionMetadata) {
+                public void apply(PartitionMetadata partitionMetadata) {
                     switch (partitionMetadata.errorCode) {
                         case ErrorMapping.NoError:
                             topicMetadataInfo.append(String.format("\nMetadata for partition [%s,%d] is %s", topic,
@@ -96,8 +92,6 @@ public class TopicMetadata {
                             topicMetadataInfo.append(String.format("\nMetadata for partition [%s,%d] is not available due to %s", topic,
                                     partitionMetadata.partitionId, ErrorMapping.exceptionFor(partitionMetadata.errorCode).getClass().getName()));
                     }
-
-                    return null;
                 }
             });
 

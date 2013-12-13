@@ -5,10 +5,7 @@ import kafka.network.BoundedByteBufferSend;
 import kafka.network.Request;
 import kafka.network.RequestChannel;
 import kafka.network.Response;
-import kafka.utils.Function1;
-import kafka.utils.Function2;
-import kafka.utils.Tuple2;
-import kafka.utils.Utils;
+import kafka.utils.*;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -78,16 +75,14 @@ public class StopReplicaRequest extends RequestOrResponse {
         buffer.put((byte) (deletePartitions ? 1 : 0));
         buffer.putInt(partitions.size());
 
-        Utils.foreach(partitions, new Function1<Tuple2<String, Integer>, Void>() {
+        Utils.foreach(partitions, new Callable1<Tuple2<String,Integer>>() {
             @Override
-            public Void apply(Tuple2<String, Integer> arg) {
+            public void apply(Tuple2<String, Integer> arg) {
                 String topic = arg._1;
                 int partitionId = arg._2;
 
                 writeShortString(buffer, topic);
                 buffer.putInt(partitionId);
-
-                return null;
             }
         });
     }

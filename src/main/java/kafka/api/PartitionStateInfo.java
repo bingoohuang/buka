@@ -1,5 +1,6 @@
 package kafka.api;
 
+import kafka.utils.Callable1;
 import kafka.utils.Function1;
 import kafka.utils.LeaderIsrAndControllerEpoch;
 import kafka.utils.Utils;
@@ -25,22 +26,20 @@ public class PartitionStateInfo {
         buffer.putInt(leaderIsrAndControllerEpoch.leaderAndIsr.leader);
         buffer.putInt(leaderIsrAndControllerEpoch.leaderAndIsr.leaderEpoch);
         buffer.putInt(leaderIsrAndControllerEpoch.leaderAndIsr.isr.size());
-        Utils.foreach(leaderIsrAndControllerEpoch.leaderAndIsr.isr, new Function1<Integer, Void>() {
+        Utils.foreach(leaderIsrAndControllerEpoch.leaderAndIsr.isr, new Callable1<Integer>() {
             @Override
-            public Void apply(Integer arg) {
+            public void apply(Integer arg) {
                 buffer.putInt(arg);
-                return null;
             }
         });
 
         buffer.putInt(leaderIsrAndControllerEpoch.leaderAndIsr.zkVersion);
         buffer.putInt(replicationFactor());
 
-        Utils.foreach(allReplicas, new Function1<Integer, Void>() {
+        Utils.foreach(allReplicas, new Callable1<Integer>() {
             @Override
-            public Void apply(Integer arg) {
+            public void apply(Integer arg) {
                 buffer.putInt(arg);
-                return null;
             }
         });
     }

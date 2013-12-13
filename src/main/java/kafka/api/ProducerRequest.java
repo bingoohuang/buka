@@ -8,10 +8,7 @@ import kafka.network.BoundedByteBufferSend;
 import kafka.network.Request;
 import kafka.network.RequestChannel;
 import kafka.network.Response;
-import kafka.utils.Function2;
-import kafka.utils.Function3;
-import kafka.utils.Tuple2;
-import kafka.utils.Utils;
+import kafka.utils.*;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -80,26 +77,23 @@ public class ProducerRequest extends RequestOrResponse {
         //save the topic structure
         buffer.putInt(dataGroupedByTopic.size()); //the number of topics
 
-        Utils.foreach(dataGroupedByTopic, new Function2<String, Map<TopicAndPartition, ByteBufferMessageSet>, Void>() {
+        Utils.foreach(dataGroupedByTopic, new Callable2<String, Map<TopicAndPartition,ByteBufferMessageSet>>() {
             @Override
-            public Void apply(String topic, Map<TopicAndPartition, ByteBufferMessageSet> topicAndPartitionData) {
+            public void apply(String topic, Map<TopicAndPartition, ByteBufferMessageSet> topicAndPartitionData) {
                 writeShortString(buffer, topic); //write the topic
                 buffer.putInt(topicAndPartitionData.size()); //the number of partitions
 
-                Utils.foreach(topicAndPartitionData, new Function2<TopicAndPartition, ByteBufferMessageSet, Void>() {
+                Utils.foreach(topicAndPartitionData, new Callable2<TopicAndPartition, ByteBufferMessageSet>() {
                     @Override
-                    public Void apply(TopicAndPartition arg1, ByteBufferMessageSet partitionMessageData) {
+                    public void apply(TopicAndPartition arg1, ByteBufferMessageSet partitionMessageData) {
                         int partition = arg1.partition;
                         ByteBuffer bytes = partitionMessageData.buffer;
                         buffer.putInt(partition);
                         buffer.putInt(bytes.limit());
                         buffer.put(bytes);
                         bytes.rewind();
-
-                        return null;
                     }
                 });
-                return null;
             }
         });
     }

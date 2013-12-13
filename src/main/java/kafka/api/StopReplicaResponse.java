@@ -66,14 +66,12 @@ public class StopReplicaResponse extends RequestOrResponse {
         buffer.putShort(errorCode);
         buffer.putInt(responseMap.size());
 
-        Utils.foreach(responseMap, new Function2<Tuple2<String, Integer>, Short, Void>() {
+        Utils.foreach(responseMap, new Callable2<Tuple2<String,Integer>, Short>() {
             @Override
-            public Void apply(Tuple2<String, Integer> key, Short value) {
+            public void apply(Tuple2<String, Integer> key, Short value) {
                 writeShortString(buffer, key._1);
                 buffer.putInt(key._2);
                 buffer.putShort(value);
-
-                return null;
             }
         });
     }

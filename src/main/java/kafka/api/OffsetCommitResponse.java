@@ -80,23 +80,19 @@ public class OffsetCommitResponse extends RequestOrResponse {
         buffer.putInt(correlationId);
         buffer.putInt(requestInfoGroupedByTopic.size()); // number of topics
 
-        Utils.foreach(requestInfoGroupedByTopic, new Function2<String, Map<TopicAndPartition, Short>, Void>() {
+        Utils.foreach(requestInfoGroupedByTopic, new Callable2<String, Map<TopicAndPartition,Short>>() {
             @Override
-            public Void apply(String topic, Map<TopicAndPartition, Short> arg2) {
+            public void apply(String topic, Map<TopicAndPartition, Short> arg2) {
                 writeShortString(buffer, topic); // topic
                 buffer.putInt(arg2.size());       // number of partitions for this topic
 
-                Utils.foreach(arg2, new Function2<TopicAndPartition, Short, Void>() {
+                Utils.foreach(arg2, new Callable2<TopicAndPartition, Short>() {
                     @Override
-                    public Void apply(TopicAndPartition arg1, Short arg2) {
+                    public void apply(TopicAndPartition arg1, Short arg2) {
                         buffer.putInt(arg1.partition);
                         buffer.putShort(arg2);  //error
-
-                        return null;
                     }
                 });
-
-                return null;
             }
         });
     }

@@ -99,31 +99,27 @@ public class OffsetResponse extends RequestOrResponse {
         buffer.putInt(correlationId);
         buffer.putInt(offsetsGroupedByTopic.size()); // topic count
 
-        Utils.foreach(offsetsGroupedByTopic, new Function2<String, Map<TopicAndPartition, PartitionOffsetsResponse>, Void>() {
+        Utils.foreach(offsetsGroupedByTopic, new Callable2<String, Map<TopicAndPartition,PartitionOffsetsResponse>>() {
             @Override
-            public Void apply(String topic, Map<TopicAndPartition, PartitionOffsetsResponse> errorAndOffsetsMap) {
+            public void apply(String topic, Map<TopicAndPartition, PartitionOffsetsResponse> errorAndOffsetsMap) {
                 writeShortString(buffer, topic);
                 buffer.putInt(errorAndOffsetsMap.size()); // partition count
 
-                Utils.foreach(errorAndOffsetsMap, new Function2<TopicAndPartition, PartitionOffsetsResponse, Void>() {
+                Utils.foreach(errorAndOffsetsMap, new Callable2<TopicAndPartition, PartitionOffsetsResponse>() {
                     @Override
-                    public Void apply(TopicAndPartition arg1, PartitionOffsetsResponse errorAndOffsets) {
+                    public void apply(TopicAndPartition arg1, PartitionOffsetsResponse errorAndOffsets) {
                         buffer.putInt(arg1.partition);
                         buffer.putShort(errorAndOffsets.error);
                         buffer.putInt(errorAndOffsets.offsets.size()); // offset array length
 
-                        Utils.foreach(errorAndOffsets.offsets, new Function1<Long, Void>() {
+                        Utils.foreach(errorAndOffsets.offsets, new Callable1<Long>() {
                             @Override
-                            public Void apply(Long arg) {
+                            public void apply(Long arg) {
                                 buffer.putLong(arg);
-                                return null;
                             }
                         });
-
-                        return null;
                     }
                 });
-                return null;
             }
         });
     }

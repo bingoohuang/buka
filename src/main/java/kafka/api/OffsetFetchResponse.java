@@ -87,24 +87,21 @@ public class OffsetFetchResponse extends RequestOrResponse {
         buffer.putInt(correlationId);
         buffer.putInt(requestInfoGroupedByTopic.size()); // number of topics
 
-        Utils.foreach(requestInfoGroupedByTopic, new Function2<String, Map<TopicAndPartition, OffsetMetadataAndError>, Void>() {
+        Utils.foreach(requestInfoGroupedByTopic, new Callable2<String, Map<TopicAndPartition,OffsetMetadataAndError>>() {
             @Override
-            public Void apply(String topic, Map<TopicAndPartition, OffsetMetadataAndError> arg2) {
+            public void apply(String topic, Map<TopicAndPartition, OffsetMetadataAndError> arg2) {
                 writeShortString(buffer, topic); // topic
                 buffer.putInt(arg2.size());       // number of partitions for this topic
 
-                Utils.foreach(arg2, new Function2<TopicAndPartition, OffsetMetadataAndError, Void>() {
+                Utils.foreach(arg2, new Callable2<TopicAndPartition, OffsetMetadataAndError>() {
                     @Override
-                    public Void apply(TopicAndPartition _1, OffsetMetadataAndError _2) {
+                    public void apply(TopicAndPartition _1, OffsetMetadataAndError _2) {
                         buffer.putInt(_1.partition);
                         buffer.putLong(_2.offset);
                         writeShortString(buffer, _2.metadata);
                         buffer.putShort(_2.error);
-
-                        return null;
                     }
                 });
-                return null;
             }
         });
     }

@@ -7,10 +7,7 @@ import kafka.network.BoundedByteBufferSend;
 import kafka.network.Request;
 import kafka.network.RequestChannel;
 import kafka.network.Response;
-import kafka.utils.Function1;
-import kafka.utils.Function2;
-import kafka.utils.Function3;
-import kafka.utils.Utils;
+import kafka.utils.*;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -80,24 +77,21 @@ public class UpdateMetadataRequest extends RequestOrResponse {
         buffer.putInt(controllerId);
         buffer.putInt(controllerEpoch);
         buffer.putInt(partitionStateInfos.size());
-        Utils.foreach(partitionStateInfos, new Function2<TopicAndPartition, PartitionStateInfo, Void>() {
+        Utils.foreach(partitionStateInfos, new Callable2<TopicAndPartition, PartitionStateInfo>() {
             @Override
-            public Void apply(TopicAndPartition key, PartitionStateInfo value) {
+            public void apply(TopicAndPartition key, PartitionStateInfo value) {
                 writeShortString(buffer, key.topic);
                 buffer.putInt(key.partition);
                 value.writeTo(buffer);
-
-                return null;
             }
         });
 
         buffer.putInt(aliveBrokers.size());
 
-        Utils.foreach(aliveBrokers, new Function1<Broker, Void>() {
+        Utils.foreach(aliveBrokers, new Callable1<Broker>() {
             @Override
-            public Void apply(Broker _) {
+            public void apply(Broker _) {
                 _.writeTo(buffer);
-                return null;
             }
         });
     }

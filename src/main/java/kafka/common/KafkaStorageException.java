@@ -10,4 +10,8 @@ public class KafkaStorageException extends KafkaException {
     public KafkaStorageException(IOException e, String format, Object... args) {
         super(e, format, args);
     }
+
+    public KafkaStorageException(Throwable e, String format, Object... args) {
+        super(e, format, args);
+    }
 }

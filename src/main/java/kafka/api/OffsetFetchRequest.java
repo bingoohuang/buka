@@ -79,21 +79,18 @@ public class OffsetFetchRequest extends RequestOrResponse {
         writeShortString(buffer, groupId);             // consumer group
         buffer.putInt(requestInfoGroupedByTopic.size()); // number of topics
 
-        Utils.foreach(requestInfoGroupedByTopic, new Function2<String, Collection<TopicAndPartition>, Void>() {
+        Utils.foreach(requestInfoGroupedByTopic, new Callable2<String, Collection<TopicAndPartition>>() {
             @Override
-            public Void apply(String topic, Collection<TopicAndPartition> topicAndPartitions) {
+            public void apply(String topic, Collection<TopicAndPartition> topicAndPartitions) {
                 writeShortString(buffer, topic); // topic
                 buffer.putInt(topicAndPartitions.size());       // number of partitions for this topic
 
-                Utils.foreach(topicAndPartitions, new Function1<TopicAndPartition, Void>() {
+                Utils.foreach(topicAndPartitions, new Callable1<TopicAndPartition>() {
                     @Override
-                    public Void apply(TopicAndPartition arg) {
+                    public void apply(TopicAndPartition arg) {
                         buffer.putInt(arg.partition);
-                        return null;
                     }
                 });
-
-                return null;
             }
         });
     }

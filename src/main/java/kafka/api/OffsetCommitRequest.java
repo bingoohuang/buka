@@ -8,6 +8,7 @@ import kafka.network.BoundedByteBufferSend;
 import kafka.network.Request;
 import kafka.network.RequestChannel;
 import kafka.network.Response;
+import kafka.utils.Callable2;
 import kafka.utils.Function2;
 import kafka.utils.Tuple2;
 import kafka.utils.Utils;
@@ -59,23 +60,20 @@ public class OffsetCommitRequest extends RequestOrResponse {
         // Write OffsetCommitRequest
         writeShortString(buffer, groupId);             // consumer group
         buffer.putInt(requestInfoGroupedByTopic.size()); // number of topics
-        Utils.foreach(requestInfoGroupedByTopic, new Function2<String, Map<TopicAndPartition, OffsetMetadataAndError>, Void>() {
+        Utils.foreach(requestInfoGroupedByTopic, new Callable2<String, Map<TopicAndPartition,OffsetMetadataAndError>>() {
             @Override
-            public Void apply(String topic, Map<TopicAndPartition, OffsetMetadataAndError> arg2) {
+            public void apply(String topic, Map<TopicAndPartition, OffsetMetadataAndError> arg2) {
                 writeShortString(buffer, topic); // topic
                 buffer.putInt(arg2.size());       // number of partitions for this topic
 
-                Utils.foreach(arg2, new Function2<TopicAndPartition, OffsetMetadataAndError, Void>() {
+                Utils.foreach(arg2, new Callable2<TopicAndPartition, OffsetMetadataAndError>() {
                     @Override
-                    public Void apply(TopicAndPartition a1, OffsetMetadataAndError a2) {
+                    public void apply(TopicAndPartition a1, OffsetMetadataAndError a2) {
                         buffer.putInt(a1.partition);  // partition
                         buffer.putLong(a2.offset);    // offset
                         writeShortString(buffer, a2.metadata); // metadata
-                        return null;
                     }
                 });
-
-                return null;
             }
         });
     }

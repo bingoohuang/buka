@@ -1,5 +1,6 @@
 package kafka.utils;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.*;
 import kafka.common.KafkaException;
 import kafka.common.KafkaStorageException;
@@ -164,9 +165,9 @@ public abstract class Utils {
      * @param log    The log method to use for logging. E.g. logger.warn
      * @param action The action to execute
      */
-    public static void swallow(Function2<Object, Throwable, Void> log, Function<Void> action) {
+    public static void swallow(Function2<Object, Throwable, Void> log, Runnable action) {
         try {
-            action.apply();
+            action.run();
         } catch (Throwable e) {
             log.apply(e.getMessage(), e);
         }
@@ -621,7 +622,7 @@ public abstract class Utils {
     /**
      * Execute the given function inside the lock
      */
-    public static <T> T inLock(Lock lock, Function<T> fun) {
+    public static <T> T inLock(Lock lock, Function0<T> fun) {
         lock.lock();
         try {
             return fun.apply();
@@ -677,6 +678,14 @@ public abstract class Utils {
         return null;
     }
 
+    public static <S> S head(Iterable<S> current) {
+        for (S s : current) {
+            return s;
+        }
+
+        return null;
+    }
+
     public static <S> S head(List<S> current) {
         return current != null && current.size() > 0 ? current.get(0) : null;
     }
@@ -704,7 +713,7 @@ public abstract class Utils {
         return result;
     }
 
-    public static <K, V> Multimap<K, V> groupBy(Collection<V> set,  Function1<V, Tuple2<K, V>> function) {
+    public static <K, V> Multimap<K, V> groupBy(Collection<V> set, Function1<V, Tuple2<K, V>> function) {
         Multimap<K, V> result = HashMultimap.create();
 
         for (V v : set) {
@@ -772,7 +781,7 @@ public abstract class Utils {
         return ret;
     }
 
-    public static < V, K1, V1> Map<K1, V1> map(Collection<V> list, Function1<V, Tuple2<K1, V1>> func) {
+    public static <V, K1, V1> Map<K1, V1> map(Collection<V> list, Function1<V, Tuple2<K1, V1>> func) {
         Map<K1, V1> ret = Maps.newHashMap();
         for (V v : list) {
             Tuple2<K1, V1> tuple = func.apply(v);
@@ -861,19 +870,19 @@ public abstract class Utils {
         return map;
     }
 
-    public static <K, K1, V> void foreach(Table<K1, K, V> table, Function2<K1, Map<K, V>, Void> func) {
+    public static <K, K1, V> void foreach(Table<K1, K, V> table, Callable2<K1, Map<K, V>> func) {
         for (K1 row : table.rowKeySet()) {
             func.apply(row, table.row(row));
         }
     }
 
-    public static <K, V> void foreach(Map<K, V> map, Function2<K, V, Void> func) {
+    public static <K, V> void foreach(Map<K, V> map, Callable2<K, V> func) {
         for (Map.Entry<K, V> entry : map.entrySet()) {
             func.apply(entry.getKey(), entry.getValue());
         }
     }
 
-    public static <K, V> void foreach(Multimap<K, V> map, Function2<K, Collection<V>, Void> func) {
+    public static <K, V> void foreach(Multimap<K, V> map, Callable2<K, Collection<V>> func) {
         for (K k : map.keySet()) {
             Collection<V> vs = map.get(k);
 
@@ -881,7 +890,7 @@ public abstract class Utils {
         }
     }
 
-    public static <V> void foreach(Collection<V> coll, Function1<V, Void> func) {
+    public static <V> void foreach(Collection<V> coll, Callable1<V> func) {
         for (V v : coll) {
             func.apply(v);
         }
@@ -912,5 +921,23 @@ public abstract class Utils {
         }
 
         return ret;
+    }
+
+    public static <S> S lastOption(Iterable<S> ms) {
+        S last = null;
+        for (S s : ms) {
+            last = s;
+        }
+
+        return last;
+
+    }
+
+    public static <S> List<S> filter(Collection<S> coll, Predicate<S> predicate) {
+        List<S> list = Lists.newArrayList();
+        for (S s : coll) {
+            if (predicate.apply(s)) list.add(s);
+        }
+        return list;
     }
 }

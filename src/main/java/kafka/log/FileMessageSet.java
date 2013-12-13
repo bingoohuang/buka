@@ -8,6 +8,7 @@ import kafka.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -17,7 +18,7 @@ import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @NonThreadSafe
-public class FileMessageSet extends MessageSet {
+public class FileMessageSet extends MessageSet implements Closeable{
     public volatile File file;
     private FileChannel channel;
     private final int start;

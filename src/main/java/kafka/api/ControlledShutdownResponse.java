@@ -3,6 +3,7 @@ package kafka.api;
 import com.google.common.collect.Sets;
 import kafka.common.ErrorMapping;
 import kafka.common.TopicAndPartition;
+import kafka.utils.Callable1;
 import kafka.utils.Function1;
 import kafka.utils.Function2;
 import kafka.utils.Utils;
@@ -66,12 +67,11 @@ public class ControlledShutdownResponse extends RequestOrResponse {
         buffer.putShort(errorCode);
         buffer.putInt(partitionsRemaining.size());
 
-        Utils.foreach(partitionsRemaining, new Function1<TopicAndPartition, Void>() {
+        Utils.foreach(partitionsRemaining, new Callable1<TopicAndPartition>() {
             @Override
-            public Void apply(TopicAndPartition topicAndPartition) {
+            public void apply(TopicAndPartition topicAndPartition) {
                 writeShortString(buffer, topicAndPartition.topic);
                 buffer.putInt(topicAndPartition.partition);
-                return null;
             }
         });
     }

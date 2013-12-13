@@ -5,6 +5,7 @@ import kafka.network.BoundedByteBufferSend;
 import kafka.network.Request;
 import kafka.network.RequestChannel;
 import kafka.network.Response;
+import kafka.utils.Callable1;
 import kafka.utils.Function1;
 import kafka.utils.Function2;
 import kafka.utils.Utils;
@@ -55,11 +56,10 @@ public class TopicMetadataRequest extends RequestOrResponse {
         buffer.putInt(correlationId);
         writeShortString(buffer, clientId);
         buffer.putInt(topics.size());
-        Utils.foreach(topics, new Function1<String, Void>() {
+        Utils.foreach(topics, new Callable1<String>() {
             @Override
-            public Void apply(String topic) {
+            public void apply(String topic) {
                 writeShortString(buffer, topic);
-                return null;
             }
         });
     }

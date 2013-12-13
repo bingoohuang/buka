@@ -7,10 +7,7 @@ import kafka.network.BoundedByteBufferSend;
 import kafka.network.Request;
 import kafka.network.RequestChannel;
 import kafka.network.Response;
-import kafka.utils.Function2;
-import kafka.utils.Function3;
-import kafka.utils.Tuple2;
-import kafka.utils.Utils;
+import kafka.utils.*;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -87,23 +84,20 @@ public class OffsetRequest extends RequestOrResponse {
 
         buffer.putInt(requestInfoGroupedByTopic.size()); // topic count
 
-        Utils.foreach(requestInfoGroupedByTopic, new Function2<String, Map<TopicAndPartition, PartitionOffsetRequestInfo>, Void>() {
+        Utils.foreach(requestInfoGroupedByTopic, new Callable2<String, Map<TopicAndPartition,PartitionOffsetRequestInfo>>() {
             @Override
-            public Void apply(String topic, Map<TopicAndPartition, PartitionOffsetRequestInfo> partitionInfos) {
+            public void apply(String topic, Map<TopicAndPartition, PartitionOffsetRequestInfo> partitionInfos) {
                 writeShortString(buffer, topic);
                 buffer.putInt(partitionInfos.size()); // partition count
 
-                Utils.foreach(partitionInfos, new Function2<TopicAndPartition, PartitionOffsetRequestInfo, Void>() {
+                Utils.foreach(partitionInfos, new Callable2<TopicAndPartition, PartitionOffsetRequestInfo>() {
                     @Override
-                    public Void apply(TopicAndPartition arg1, PartitionOffsetRequestInfo partitionInfo) {
+                    public void apply(TopicAndPartition arg1, PartitionOffsetRequestInfo partitionInfo) {
                         buffer.putInt(arg1.partition);
                         buffer.putLong(partitionInfo.time);
                         buffer.putInt(partitionInfo.maxNumOffsets);
-
-                        return null;
                     }
                 });
-                return null;
             }
         });
     }

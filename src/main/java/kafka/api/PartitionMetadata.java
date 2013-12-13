@@ -3,6 +3,7 @@ package kafka.api;
 import com.google.common.collect.Lists;
 import kafka.cluster.Broker;
 import kafka.common.ErrorMapping;
+import kafka.utils.Callable1;
 import kafka.utils.Function1;
 import kafka.utils.Range;
 import kafka.utils.Utils;
@@ -82,21 +83,19 @@ public class PartitionMetadata {
 
     /* number of replicas */
         buffer.putInt(replicas.size());
-        Utils.foreach(replicas, new Function1<Broker, Void>() {
+        Utils.foreach(replicas, new Callable1<Broker>() {
             @Override
-            public Void apply(Broker broker) {
+            public void apply(Broker broker) {
                 buffer.putInt(broker.id);
-                return null;
             }
         });
 
     /* number of in-sync replicas */
         buffer.putInt(isr.size());
-        Utils.foreach(isr, new Function1<Broker, Void>() {
+        Utils.foreach(isr, new Callable1<Broker>() {
             @Override
-            public Void apply(Broker broker) {
+            public void apply(Broker broker) {
                 buffer.putInt(broker.id);
-                return null;
             }
         });
     }

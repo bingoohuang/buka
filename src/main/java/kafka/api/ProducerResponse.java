@@ -89,14 +89,14 @@ public class ProducerResponse extends RequestOrResponse {
         buffer.putInt(correlationId);
         buffer.putInt(groupedStatus.size()); // topic count
 
-        Utils.foreach(groupedStatus, new Function2<String, Map<TopicAndPartition, ProducerResponseStatus>, Void>() {
+        Utils.foreach(groupedStatus, new Callable2<String, Map<TopicAndPartition,ProducerResponseStatus>>() {
             @Override
-            public Void apply(String topic, Map<TopicAndPartition, ProducerResponseStatus> errorsAndOffsets) {
+            public void apply(String topic, Map<TopicAndPartition, ProducerResponseStatus> errorsAndOffsets) {
                 writeShortString(buffer, topic);
                 buffer.putInt(errorsAndOffsets.size()); // partition count
-                Utils.foreach(errorsAndOffsets, new Function2<TopicAndPartition, ProducerResponseStatus, Void>() {
+                Utils.foreach(errorsAndOffsets, new Callable2<TopicAndPartition, ProducerResponseStatus>() {
                     @Override
-                    public Void apply(TopicAndPartition arg1, ProducerResponseStatus arg2) {
+                    public void apply(TopicAndPartition arg1, ProducerResponseStatus arg2) {
                         int partition = arg1.partition;
                         short error = arg2.error;
                         long nextOffset = arg2.offset;
@@ -104,11 +104,8 @@ public class ProducerResponse extends RequestOrResponse {
                         buffer.putInt(partition);
                         buffer.putShort(error);
                         buffer.putLong(nextOffset);
-                        return null;
                     }
                 });
-
-                return null;
             }
         });
     }

@@ -83,24 +83,21 @@ public class LeaderAndIsrRequest extends RequestOrResponse {
         buffer.putInt(controllerEpoch);
         buffer.putInt(partitionStateInfos.size());
 
-        Utils.foreach(partitionStateInfos, new Function2<Tuple2<String, Integer>, PartitionStateInfo, Void>() {
+        Utils.foreach(partitionStateInfos, new Callable2<Tuple2<String,Integer>, PartitionStateInfo>() {
             @Override
-            public Void apply(Tuple2<String, Integer> key, PartitionStateInfo value) {
+            public void apply(Tuple2<String, Integer> key, PartitionStateInfo value) {
                 writeShortString(buffer, key._1);
                 buffer.putInt(key._2);
                 value.writeTo(buffer);
-
-                return null;
             }
         });
 
         buffer.putInt(leaders.size());
 
-        Utils.foreach(leaders, new Function1<Broker, Void>() {
+        Utils.foreach(leaders, new Callable1<Broker>() {
             @Override
-            public Void apply(Broker broker) {
+            public void apply(Broker broker) {
                 broker.writeTo(buffer);
-                return null;
             }
         });
     }
