@@ -28,7 +28,7 @@ public class FetchRequestReader implements RequestReader {
         int minBytes = buffer.getInt();
         int topicCount = buffer.getInt();
 
-        Map<TopicAndPartition, PartitionFetchInfo> pairs = Utils.flatMap(1, topicCount, new Function0<Map<TopicAndPartition, PartitionFetchInfo>>() {
+        Map<TopicAndPartition, PartitionFetchInfo> pairs = Utils.flatMaps(1, topicCount, new Function0<Map<TopicAndPartition, PartitionFetchInfo>>() {
             @Override
             public Map<TopicAndPartition, PartitionFetchInfo> apply() {
                 final String topic = readShortString(buffer);

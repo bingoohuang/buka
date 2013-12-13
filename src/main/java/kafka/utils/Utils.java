@@ -772,7 +772,7 @@ public abstract class Utils {
         return ret;
     }
 
-    public static < V, K1, V1> Map<K1, V1> map(List<V> list, Function1<V, Tuple2<K1, V1>> func) {
+    public static < V, K1, V1> Map<K1, V1> map(Collection<V> list, Function1<V, Tuple2<K1, V1>> func) {
         Map<K1, V1> ret = Maps.newHashMap();
         for (V v : list) {
             Tuple2<K1, V1> tuple = func.apply(v);
@@ -786,6 +786,34 @@ public abstract class Utils {
         for (Map.Entry<K, V> entry : map.entrySet()) {
             V1 v1 = func.apply(entry.getKey(), entry.getValue());
             v1s.add(v1);
+        }
+        return v1s;
+    }
+
+    public static <V, V1> List<V1> mapList(Collection<V> coll, Function1<V, V1> func) {
+        List<V1> v1s = Lists.newArrayList();
+        for (V v : coll) {
+            V1 v1 = func.apply(v);
+            v1s.add(v1);
+        }
+        return v1s;
+    }
+
+
+    public static <V, V1> List<V1> mapLists(Collection<V> coll, Function1<V, Collection<V1>> func) {
+        List<V1> v1s = Lists.newArrayList();
+        for (V v : coll) {
+            Collection<V1> v1 = func.apply(v);
+            v1s.addAll(v1);
+        }
+        return v1s;
+    }
+
+
+    public static <V, V1> List<V1> mapList(Collection<V> coll, Map<V, V1> map) {
+        List<V1> v1s = Lists.newArrayList();
+        for (V v : coll) {
+            v1s.add(map.get(v));
         }
         return v1s;
     }

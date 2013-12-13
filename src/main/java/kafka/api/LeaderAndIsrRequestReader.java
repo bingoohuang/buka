@@ -1,6 +1,5 @@
 package kafka.api;
 
-import com.google.common.collect.ImmutableMap;
 import kafka.cluster.Broker;
 import kafka.cluster.Brokers;
 import kafka.utils.Function0;
@@ -31,14 +30,14 @@ public class LeaderAndIsrRequestReader implements RequestReader {
         int controllerEpoch = buffer.getInt();
         int partitionStateInfosCount = buffer.getInt();
         Map<Tuple2<String, Integer>, PartitionStateInfo> partitionStateInfos =
-                Utils.flatMap(0, partitionStateInfosCount, new Function0<Map<Tuple2<String, Integer>, PartitionStateInfo>>() {
+                Utils.flatMap(0, partitionStateInfosCount, new Function0<Tuple2<Tuple2<String, Integer>, PartitionStateInfo>>() {
                     @Override
-                    public Map<Tuple2<String, Integer>, PartitionStateInfo> apply() {
+                    public Tuple2<Tuple2<String, Integer>, PartitionStateInfo> apply() {
                         String topic = readShortString(buffer);
                         int partition = buffer.getInt();
                         PartitionStateInfo partitionStateInfo = PartitionStateInfos.readFrom(buffer);
 
-                        return ImmutableMap.of(Tuple2.make(topic, partition), partitionStateInfo);
+                        return Tuple2.make(Tuple2.make(topic, partition), partitionStateInfo);
                     }
                 });
 

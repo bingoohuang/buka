@@ -22,9 +22,7 @@ public class Broker {
 
     @Override
     public String toString() {
-        return "id=" + id +
-                ",host=" + host +
-                ",port=" + port;
+        return id + " (" + host + ":" + port + ")";
     }
 
     public String getConnectionString() {

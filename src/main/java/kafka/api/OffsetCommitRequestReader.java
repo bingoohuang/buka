@@ -1,9 +1,9 @@
 package kafka.api;
 
-import com.google.common.collect.ImmutableMap;
 import kafka.common.OffsetMetadataAndError;
 import kafka.common.TopicAndPartition;
 import kafka.utils.Function0;
+import kafka.utils.Tuple2;
 import kafka.utils.Utils;
 
 import java.nio.ByteBuffer;
@@ -27,20 +27,20 @@ public class OffsetCommitRequestReader implements RequestReader {
         // Read the OffsetRequest
         String consumerGroupId = readShortString(buffer);
         int topicCount = buffer.getInt();
-        Map<TopicAndPartition, OffsetMetadataAndError> pairs = Utils.flatMap(1, topicCount, new Function0<Map<TopicAndPartition, OffsetMetadataAndError>>() {
+        Map<TopicAndPartition, OffsetMetadataAndError> pairs = Utils.flatMaps(1, topicCount, new Function0<Map<TopicAndPartition, OffsetMetadataAndError>>() {
             @Override
             public Map<TopicAndPartition, OffsetMetadataAndError> apply() {
                 final String topic = readShortString(buffer);
                 int partitionCount = buffer.getInt();
 
-                return Utils.flatMap(1, partitionCount, new Function0<Map<TopicAndPartition, OffsetMetadataAndError>>() {
+                return Utils.flatMap(1, partitionCount, new Function0<Tuple2<TopicAndPartition, OffsetMetadataAndError>>() {
                     @Override
-                    public Map<TopicAndPartition, OffsetMetadataAndError> apply() {
+                    public Tuple2<TopicAndPartition, OffsetMetadataAndError> apply() {
                         int partitionId = buffer.getInt();
                         long offset = buffer.getLong();
                         String metadata = readShortString(buffer);
 
-                        return ImmutableMap.of(
+                        return Tuple2.make(
                                 new TopicAndPartition(topic, partitionId),
                                 new OffsetMetadataAndError(offset, metadata)
                         );

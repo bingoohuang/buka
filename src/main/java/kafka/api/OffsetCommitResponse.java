@@ -1,12 +1,8 @@
 package kafka.api;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 import kafka.common.TopicAndPartition;
-import kafka.utils.Function0;
-import kafka.utils.Function2;
-import kafka.utils.Function3;
-import kafka.utils.Utils;
+import kafka.utils.*;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -21,18 +17,18 @@ public class OffsetCommitResponse extends RequestOrResponse {
         int topicCount = buffer.getInt();
 
 
-        Map<TopicAndPartition, Short> pairs = Utils.flatMap(1, topicCount, new Function0<Map<TopicAndPartition, Short>>() {
+        Map<TopicAndPartition, Short> pairs = Utils.flatMaps(1, topicCount, new Function0<Map<TopicAndPartition, Short>>() {
             @Override
             public Map<TopicAndPartition, Short> apply() {
                 final String topic = readShortString(buffer);
                 int partitionCount = buffer.getInt();
 
-                return Utils.flatMap(1, partitionCount, new Function0<Map<TopicAndPartition, Short>>() {
+                return Utils.flatMap(1, partitionCount, new Function0<Tuple2<TopicAndPartition, Short>>() {
                     @Override
-                    public Map<TopicAndPartition, Short> apply() {
+                    public Tuple2<TopicAndPartition, Short> apply() {
                         int partitionId = buffer.getInt();
                         short error = buffer.getShort();
-                        return ImmutableMap.of(new TopicAndPartition(topic, partitionId), error);
+                        return Tuple2.make(new TopicAndPartition(topic, partitionId), error);
                     }
                 });
             }

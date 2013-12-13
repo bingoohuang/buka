@@ -16,7 +16,7 @@ public class ProducerResponse extends RequestOrResponse {
         int topicCount = buffer.getInt();
 
         Map<TopicAndPartition, ProducerResponseStatus> status =
-                Utils.flatMap(1, topicCount, new Function0<Map<TopicAndPartition, ProducerResponseStatus>>() {
+                Utils.flatMaps(1, topicCount, new Function0<Map<TopicAndPartition, ProducerResponseStatus>>() {
                     @Override
                     public Map<TopicAndPartition, ProducerResponseStatus> apply() {
                         final String topic = readShortString(buffer);

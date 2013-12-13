@@ -28,7 +28,7 @@ public class ProducerRequestReader implements RequestReader {
         int topicCount = buffer.getInt();
 
         final Map<TopicAndPartition, ByteBufferMessageSet> partitionData =
-                Utils.flatMap(1, topicCount, new Function0<Map<TopicAndPartition, ByteBufferMessageSet>>() {
+                Utils.flatMaps(1, topicCount, new Function0<Map<TopicAndPartition, ByteBufferMessageSet>>() {
 
                     @Override
                     public Map<TopicAndPartition, ByteBufferMessageSet> apply() {
