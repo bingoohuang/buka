@@ -693,13 +693,23 @@ public abstract class Utils {
         }
     }
 
-    public static <T, K, V> Table<T, K, V> groupBy(
-            Map<K, V> map, Function2<K, V, T> function) {
+    public static <T, K, V> Table<T, K, V> groupBy(Map<K, V> map, Function2<K, V, T> function) {
 
         Table<T, K, V> result = HashBasedTable.create();
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
             result.put(function.apply(entry.getKey(), entry.getValue()), entry.getKey(), entry.getValue());
+        }
+
+        return result;
+    }
+
+    public static <K, V> Multimap<K, V> groupBy(Collection<V> set,  Function1<V, Tuple2<K, V>> function) {
+        Multimap<K, V> result = HashMultimap.create();
+
+        for (V v : set) {
+            Tuple2<K, V> apply = function.apply(v);
+            result.put(apply._1, apply._2);
         }
 
         return result;
@@ -720,6 +730,17 @@ public abstract class Utils {
         R foldingValue = initValue;
         for (Map.Entry<K, V> entry : map.entrySet()) {
             foldingValue = foldFunction.apply(foldingValue, entry.getKey(), entry.getValue());
+        }
+
+        return foldingValue;
+    }
+
+    public static <K, V, R> R foldLeft(Multimap<K, V> map, R initValue, Function3<R, K, Collection<V>, R> foldFunction) {
+        R foldingValue = initValue;
+        for (K k : map.keySet()) {
+            Collection<V> vs = map.get(k);
+
+            foldingValue = foldFunction.apply(foldingValue, k, vs);
         }
 
         return foldingValue;
@@ -751,6 +772,15 @@ public abstract class Utils {
         return ret;
     }
 
+    public static < V, K1, V1> Map<K1, V1> map(List<V> list, Function1<V, Tuple2<K1, V1>> func) {
+        Map<K1, V1> ret = Maps.newHashMap();
+        for (V v : list) {
+            Tuple2<K1, V1> tuple = func.apply(v);
+            ret.put(tuple._1, tuple._2);
+        }
+        return ret;
+    }
+
     public static <K, V, V1> List<V1> mapList(Map<K, V> map, Function2<K, V, V1> func) {
         List<V1> v1s = Lists.newArrayList();
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -770,7 +800,18 @@ public abstract class Utils {
         return v1s;
     }
 
-    public static <K, V> Map<K, V> flatMap(int from, int count, Function0<Map<K, V>> func) {
+    public static <K, V> Map<K, V> flatMap(int from, int count, Function0<Tuple2<K, V>> func) {
+        Map<K, V> map = Maps.newHashMap();
+
+        for (int i = from; i < from + count; ++i) {
+            Tuple2<K, V> apply = func.apply();
+            map.put(apply._1, apply._2);
+        }
+
+        return map;
+    }
+
+    public static <K, V> Map<K, V> flatMaps(int from, int count, Function0<Map<K, V>> func) {
         Map<K, V> map = Maps.newHashMap();
 
         for (int i = from; i < from + count; ++i) {
@@ -796,12 +837,19 @@ public abstract class Utils {
         for (K1 row : table.rowKeySet()) {
             func.apply(row, table.row(row));
         }
-
     }
 
     public static <K, V> void foreach(Map<K, V> map, Function2<K, V, Void> func) {
         for (Map.Entry<K, V> entry : map.entrySet()) {
             func.apply(entry.getKey(), entry.getValue());
+        }
+    }
+
+    public static <K, V> void foreach(Multimap<K, V> map, Function2<K, Collection<V>, Void> func) {
+        for (K k : map.keySet()) {
+            Collection<V> vs = map.get(k);
+
+            func.apply(k, vs);
         }
     }
 
@@ -815,6 +863,15 @@ public abstract class Utils {
         List<T> ret = Lists.newArrayList();
         for (int i = from; i < from + count; ++i) {
             ret.add(fun.apply(i));
+        }
+
+        return ret;
+    }
+
+    public static <T> List<T> flatLists(int from, int count, Function1<Integer, List<T>> fun) {
+        List<T> ret = Lists.newArrayList();
+        for (int i = from; i < from + count; ++i) {
+            ret.addAll(fun.apply(i));
         }
 
         return ret;
