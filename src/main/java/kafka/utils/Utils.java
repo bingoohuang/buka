@@ -4,6 +4,9 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.*;
 import kafka.common.KafkaException;
 import kafka.common.KafkaStorageException;
+import kafka.log.LogConfig;
+import kafka.log.LogSegment;
+import kafka.log.LogToClean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -165,11 +168,20 @@ public abstract class Utils {
      * @param log    The log method to use for logging. E.g. logger.warn
      * @param action The action to execute
      */
-    public static void swallow(Function2<Object, Throwable, Void> log, Runnable action) {
+    public static void swallow(Callable2<Object, Throwable> log, Runnable action) {
         try {
             action.run();
         } catch (Throwable e) {
             log.apply(e.getMessage(), e);
+        }
+    }
+
+
+    public static void swallow(Runnable action) {
+        try {
+            action.run();
+        } catch (Throwable e) {
+            logger.warn(e.getMessage(), e);
         }
     }
 
@@ -691,7 +703,7 @@ public abstract class Utils {
     }
 
     public static <S> List<S> tail(List<S> current) {
-        return current != null && current.size() > 1 ? current.subList(1, current.size()) : null;
+        return current != null && current.size() > 1 ? current.subList(1, current.size()) : Lists.<S>newArrayList();
     }
 
     public static long write(GatheringByteChannel channel, ByteBuffer... byteBuffers) {
@@ -713,7 +725,7 @@ public abstract class Utils {
         return result;
     }
 
-    public static <K, V> Multimap<K, V> groupBy(Collection<V> set, Function1<V, Tuple2<K, V>> function) {
+    public static <K, V> Multimap<K, V> groupBy(Iterable<V> set, Function1<V, Tuple2<K, V>> function) {
         Multimap<K, V> result = HashMultimap.create();
 
         for (V v : set) {
@@ -781,11 +793,20 @@ public abstract class Utils {
         return ret;
     }
 
-    public static <V, K1, V1> Map<K1, V1> map(Collection<V> list, Function1<V, Tuple2<K1, V1>> func) {
+    public static <V, K1, V1> Map<K1, V1> map(Iterable<V> list, Function1<V, Tuple2<K1, V1>> func) {
         Map<K1, V1> ret = Maps.newHashMap();
         for (V v : list) {
             Tuple2<K1, V1> tuple = func.apply(v);
             ret.put(tuple._1, tuple._2);
+        }
+        return ret;
+    }
+
+    public static <V, K1, V1> Map<K1, V1> maps(Iterable<V> list, Function1<V, Map<K1, V1>> func) {
+        Map<K1, V1> ret = Maps.newHashMap();
+        for (V v : list) {
+            Map<K1, V1> map = func.apply(v);
+            ret.putAll(map);
         }
         return ret;
     }
@@ -801,6 +822,15 @@ public abstract class Utils {
 
     public static <V, V1> List<V1> mapList(Collection<V> coll, Function1<V, V1> func) {
         List<V1> v1s = Lists.newArrayList();
+        for (V v : coll) {
+            V1 v1 = func.apply(v);
+            v1s.add(v1);
+        }
+        return v1s;
+    }
+
+    public static <V, V1> Set<V1> mapSet(Collection<V> coll, Function1<V, V1> func) {
+        Set<V1> v1s = Sets.newHashSet();
         for (V v : coll) {
             V1 v1 = func.apply(v);
             v1s.add(v1);
@@ -890,7 +920,7 @@ public abstract class Utils {
         }
     }
 
-    public static <V> void foreach(Collection<V> coll, Callable1<V> func) {
+    public static <V> void foreach(Iterable<V> coll, Callable1<V> func) {
         for (V v : coll) {
             func.apply(v);
         }
@@ -933,11 +963,27 @@ public abstract class Utils {
 
     }
 
-    public static <S> List<S> filter(Collection<S> coll, Predicate<S> predicate) {
+    public static <S> List<S> filter(Iterable<S> coll, Predicate<S> predicate) {
         List<S> list = Lists.newArrayList();
         for (S s : coll) {
             if (predicate.apply(s)) list.add(s);
         }
         return list;
+    }
+
+    public static <K, V> V getOrElse(Map<K, V> map, K topic, V defaultValue) {
+        V v = map.get(topic);
+        return v == null ? defaultValue : v;
+    }
+
+    public static <S> S last(List<S> list) {
+        if( list.size() > 0 ) return list.get(list.size() - 1);
+
+        throw new KafkaException("list is empty, last is not available");
+    }
+
+    public static LogToClean max(List<LogToClean> dirtyLogs) {
+        Collections.sort(dirtyLogs);
+        return last(dirtyLogs);
     }
 }

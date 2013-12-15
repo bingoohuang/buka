@@ -68,7 +68,7 @@ public class ByteBufferMessageSets {
         return new ByteBufferMessageSet(outputBuffer);
     }
 
-    private static void writeMessage(ByteBuffer buffer, Message message, long offset) {
+    public static void writeMessage(ByteBuffer buffer, Message message, long offset) {
         buffer.putLong(offset);
         buffer.putInt(message.size());
         buffer.put(message.buffer);

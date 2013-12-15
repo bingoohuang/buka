@@ -756,7 +756,7 @@ public class Log extends KafkaMetricsGroup implements Closeable {
      * @param newSegment  The new log segment to add to the log
      * @param oldSegments The old log segments to delete from the log
      */
-    private void replaceSegments(LogSegment newSegment, List<LogSegment> oldSegments, int expectedTruncates) {
+    public void replaceSegments(LogSegment newSegment, List<LogSegment> oldSegments, int expectedTruncates) {
         synchronized (lock) {
             if (expectedTruncates != numberOfTruncates())
                 throw new OptimisticLockFailureException("The log has been truncated, expected %d but found %d.", expectedTruncates, numberOfTruncates());
