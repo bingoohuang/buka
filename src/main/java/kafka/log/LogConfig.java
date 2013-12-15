@@ -4,7 +4,7 @@ import kafka.cluster.LogConfigs;
 
 import java.util.Properties;
 
-public class LogConfig {
+public class LogConfig implements Cloneable {
     public int segmentSize = 1024*1024;
     public long segmentMs = Long.MAX_VALUE;
     public long flushInterval = Long.MAX_VALUE;
@@ -82,5 +82,14 @@ public class LogConfig {
         props.put(LogConfigs.MinCleanableDirtyRatioProp, minCleanableRatio + "");
         props.put(LogConfigs.CleanupPolicyProp, (dedupe) ? "dedupe" : "delete");
         return props;
+    }
+
+    @Override
+    protected LogConfig clone()  {
+        try {
+            return (LogConfig) super.clone();
+        } catch (CloneNotSupportedException e) {
+            return null;
+        }
     }
 }

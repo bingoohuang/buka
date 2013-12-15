@@ -935,9 +935,27 @@ public abstract class Utils {
         }
     }
 
+
+    public static List<Integer> flatList(int from, int count) {
+        return flatList(from, count, 1);
+    }
+
+    public static List<Integer> flatList(int from, int to, int by) {
+        return flatList(from, to, by, new Function1<Integer, Integer>() {
+            @Override
+            public Integer apply(Integer arg) {
+                return arg;
+            }
+        });
+    }
+
     public static <T> List<T> flatList(int from, int count, Function1<Integer, T> fun) {
+        return flatList(from, count + from, 1, fun);
+    }
+
+    public static <T> List<T> flatList(int from, int to, int by, Function1<Integer, T> fun) {
         List<T> ret = Lists.newArrayList();
-        for (int i = from; i < from + count; ++i) {
+        for (int i = from; i < to; i+= by) {
             ret.add(fun.apply(i));
         }
 
@@ -1016,5 +1034,36 @@ public abstract class Utils {
 
     public static <T> List<T> take(List<T> items, int n) {
         return n < items.size() ? items.subList(0, n) : items;
+    }
+
+    public static <T> List<Tuple2<T, Integer>> zipWithIndex(List<T> values) {
+        return zipWithIndex(values, 0);
+    }
+    public static <T> List<Tuple2<T, Integer>> zipWithIndex(List<T> values, int from) {
+        List<Tuple2<T, Integer>> list = Lists.newArrayList();
+        for(int i = 0, ii = values.size(); i < ii; ++i) {
+            list.add(Tuple2.make(values.get(i), i + from));
+        }
+
+        return list;
+    }
+
+
+    public static <T> boolean forall(Iterable<T> coll, Predicate<T> predicate) {
+        for(T t : coll) {
+            if (!predicate.apply(t)) return false;
+        }
+
+        return true;
+    }
+
+    public static <T> int indexWhere(Iterable<T> coll, Predicate<Integer> predicate) {
+        int i = -1;
+        for(T t : coll) {
+            ++i;
+            if (predicate.apply(i)) return i;
+        }
+
+        return -1;
     }
 }

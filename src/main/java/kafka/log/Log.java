@@ -1,6 +1,7 @@
 package kafka.log;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.yammer.metrics.core.Gauge;
@@ -258,6 +259,10 @@ public class Log extends KafkaMetricsGroup implements Closeable {
         }
     }
 
+    public LogAppendInfo append(ByteBufferMessageSet messages) throws KafkaStorageException {
+        return append(messages, true);
+    }
+
     /**
      * Append this message set to the active segment of the log, rolling over to a fresh segment if necessary.
      * <p/>
@@ -396,6 +401,9 @@ public class Log extends KafkaMetricsGroup implements Closeable {
         }
     }
 
+    public MessageSet read(Long startOffset, Integer maxLength) {
+        return read(startOffset, maxLength, null);
+    }
 
     /**
      * Read messages from the log
@@ -406,7 +414,8 @@ public class Log extends KafkaMetricsGroup implements Closeable {
      * @return The messages read
      * @throws OffsetOutOfRangeException If startOffset is beyond the log end offset or before the base offset of the first segment.
      */
-    public MessageSet read(Long startOffset, Integer maxLength, Long maxOffset /*= None*/) {
+
+    public MessageSet read(long startOffset, int maxLength, Long maxOffset /*= None*/) {
         logger.trace("Reading {} bytes from offset {} in log {} of length {} bytes", maxLength, startOffset, name(), size());
 
         // check if the offset is valid and in range
@@ -475,7 +484,7 @@ public class Log extends KafkaMetricsGroup implements Closeable {
     /**
      * The size of the log in bytes
      */
-    public Long size() {
+    public long size() {
         return Utils.foldLeft(logSegments(), 0L, new Function2<Long, LogSegment, Long>() {
             @Override
             public Long apply(Long arg1, LogSegment _) {
@@ -488,7 +497,7 @@ public class Log extends KafkaMetricsGroup implements Closeable {
     /**
      * The offset of the next message that will be appended to the log
      */
-    public Long logEndOffset() {
+    public long logEndOffset() {
         return nextOffset.get();
     }
 
@@ -613,7 +622,7 @@ public class Log extends KafkaMetricsGroup implements Closeable {
      *
      * @param targetOffset The offset to truncate to, an upper bound on all offsets in the log after truncation is complete.
      */
-    public void truncateTo(final Long targetOffset) {
+    public void truncateTo(final long targetOffset) {
         logger.info("Truncating log {} to offset {}.", name(), targetOffset);
         if (targetOffset < 0)
             throw new IllegalArgumentException(String.format("Cannot truncate to a negative offset (%d).", targetOffset));

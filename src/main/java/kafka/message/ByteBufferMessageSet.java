@@ -36,10 +36,17 @@ public class ByteBufferMessageSet extends MessageSet {
         this(ByteBufferMessageSets.create(new AtomicLong(0), compressionCodec, messages));
     }
 
+    public ByteBufferMessageSet(CompressionCodec compressionCodec, AtomicLong offsetCounter, Message... messages) {
+        this(ByteBufferMessageSets.create(offsetCounter, compressionCodec, Lists.newArrayList(messages)));
+    }
+
     public ByteBufferMessageSet(CompressionCodec compressionCodec, AtomicLong offsetCounter, List<Message> messages) {
         this(ByteBufferMessageSets.create(offsetCounter, compressionCodec, messages));
     }
 
+    public ByteBufferMessageSet(Message... messages) {
+        this(NoCompressionCodec.instance, messages);
+    }
     public ByteBufferMessageSet(List<Message> messages) {
         this(NoCompressionCodec.instance, new AtomicLong(0), messages);
     }
