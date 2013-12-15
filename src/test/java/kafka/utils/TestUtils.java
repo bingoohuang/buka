@@ -1,17 +1,22 @@
 package kafka.utils;
 
+import kafka.common.KafkaException;
 import kafka.message.Message;
 import kafka.message.MessageAndOffset;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 public class TestUtils {
+    public static Random random = new Random();
+
     /**
      * Check that the buffer content from buffer.position() to buffer.limit() is equal
      */
@@ -78,5 +83,17 @@ public class TestUtils {
                 return allDone();
             }
         };
+    }
+
+    public static void writeNonsenseToFile(File fileName, long position, int size) {
+        try {
+            RandomAccessFile file = new RandomAccessFile(fileName, "rw");
+            file.seek(position);
+            for(int i = 0; i <  size; ++i)
+                file.writeByte(random.nextInt(255));
+            file.close();
+        } catch (IOException e) {
+            throw new KafkaException(e);
+        }
     }
 }

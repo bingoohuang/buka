@@ -820,7 +820,16 @@ public abstract class Utils {
         return v1s;
     }
 
-    public static <V, V1> List<V1> mapList(Collection<V> coll, Function1<V, V1> func) {
+    public static <V, V1> List<V1> mapList(Iterable<V> coll, Function1<V, V1> func) {
+        List<V1> v1s = Lists.newArrayList();
+        for (V v : coll) {
+            V1 v1 = func.apply(v);
+            v1s.add(v1);
+        }
+        return v1s;
+    }
+
+    public static <V, V1> List<V1> mapList(V[] coll, Function1<V, V1> func) {
         List<V1> v1s = Lists.newArrayList();
         for (V v : coll) {
             V1 v1 = func.apply(v);
