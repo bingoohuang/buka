@@ -935,6 +935,15 @@ public abstract class Utils {
         return ret;
     }
 
+    public static <T> List<T> flatList(long from, long count, Function1<Long, T> fun) {
+        List<T> ret = Lists.newArrayList();
+        for (long i = from; i < from + count; ++i) {
+            ret.add(fun.apply(i));
+        }
+
+        return ret;
+    }
+
     public static <T> List<T> flatLists(int from, int count, Function1<Integer, List<T>> fun) {
         List<T> ret = Lists.newArrayList();
         for (int i = from; i < from + count; ++i) {
@@ -985,5 +994,18 @@ public abstract class Utils {
     public static LogToClean max(List<LogToClean> dirtyLogs) {
         Collections.sort(dirtyLogs);
         return last(dirtyLogs);
+    }
+
+    public static <A, B, T1, T2> List<Tuple2<T1, T2>> zip(List<A> lista, List<B> listb, Function2<A,B, Tuple2<T1, T2>> func) {
+        List<Tuple2<T1, T2>> list = Lists.newArrayList();
+        for (int i = 0, ii = lista.size(), jj = listb.size(); i < ii && i < jj; ++i) {
+            list.add(func.apply(lista.get(i), listb.get(i)));
+        }
+
+        return list;
+    }
+
+    public static <T> List<T> take(List<T> items, int n) {
+        return n < items.size() ? items.subList(0, n) : items;
     }
 }
