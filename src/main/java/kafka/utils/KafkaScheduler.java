@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class KafkaScheduler implements Scheduler {
+public class KafkaScheduler extends Scheduler {
     public final int threads;
     public final String threadNamePrefix /*= "kafka-scheduler-"*/;
     public final boolean daemon/* = true*/;

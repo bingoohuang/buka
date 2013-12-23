@@ -200,8 +200,9 @@ public class Log extends KafkaMetricsGroup implements Closeable {
         }
 
         // okay we need to actually recovery this log
-        Collection<LogSegment> unflushed = logSegments(this.recoveryPoint, Long.MAX_VALUE);
-        for (LogSegment curr : unflushed) {
+        Iterator<LogSegment> unflushed = logSegments(this.recoveryPoint, Long.MAX_VALUE).iterator();
+        while (unflushed.hasNext()) {
+            LogSegment curr = unflushed.next();
             logger.info("Recovering unflushed segment {} in log {}.", curr.baseOffset, name());
             int truncatedBytes = 0;
             try {
@@ -755,7 +756,7 @@ public class Log extends KafkaMetricsGroup implements Closeable {
                 logger.info("Deleting segment %d from log {}.", segment.baseOffset, name());
                 segment.delete();
             }
-        }, config.fileDeleteDelayMs, -1, TimeUnit.MILLISECONDS);
+        }, config.fileDeleteDelayMs);
     }
 
     /**

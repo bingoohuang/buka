@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @NonThreadSafe
 public class FileMessageSet extends MessageSet implements Closeable{
     public volatile File file;
-    private FileChannel channel;
+    FileChannel channel;
     private final int start;
     private final int end;
     public final boolean isSlice;

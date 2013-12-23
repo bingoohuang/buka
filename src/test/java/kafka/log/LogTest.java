@@ -5,7 +5,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import kafka.common.KafkaException;
 import kafka.common.KafkaStorageException;
-import kafka.common.MessageSizeTooLargeException;
 import kafka.common.OffsetOutOfRangeException;
 import kafka.message.*;
 import kafka.server.KafkaConfig;
@@ -173,7 +172,7 @@ public class LogTest {
         for (int i = 0; i < messages.size(); ++i)
             log.append(new ByteBufferMessageSet(NoCompressionCodec.instance,
                     new AtomicLong(messageIds.get(i)), messages.get(i)));
-        for (int i = 50; i < messageIds.get(messageIds.size() - 1); ++i) {
+        for (int i = 50; i < messages.size(); ++i) {
             final int finalI = i;
             Integer idx = Utils.indexWhere(messageIds, new Predicate<Integer>() {
                 @Override
@@ -182,7 +181,7 @@ public class LogTest {
                 }
             });
             MessageAndOffset read = Utils.head(log.read(i, 100, null));
-            assertEquals("Offset read should match message id.", (long) messageIds.get(idx), read.offset);
+            assertEquals("Offset read should match message id.", (long) (idx), read.offset);
             assertEquals("Message should match appended.", messages.get(idx), read.message);
         }
     }
@@ -623,7 +622,7 @@ public class LogTest {
             log.append(set);
 
         // files should be renamed
-        Collection<LogSegment> segments = log.logSegments();
+        List<LogSegment> segments = Lists.newArrayList(log.logSegments());
         List<File> oldFiles = Utils.mapList(segments, new Function1<LogSegment, File>() {
             @Override
             public File apply(LogSegment _) {
@@ -744,7 +743,7 @@ public class LogTest {
         log.append(new ByteBufferMessageSet(new Message((byte[]) null)));
         MessageSet ms = log.read(0L, 4096, null);
         assertEquals(0, Utils.head(ms).offset);
-        assertTrue("Message payload should be null.", Utils.head(ms).message == null);
+        assertTrue("Message payload should be null.", Utils.head(ms).message.isNull());
     }
 
     @Test

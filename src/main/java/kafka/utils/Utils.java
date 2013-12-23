@@ -205,7 +205,7 @@ public abstract class Utils {
      * @param buffer The buffer to translate
      */
     public static String readString(ByteBuffer buffer) {
-        return Charset.defaultCharset().toString();
+        return readString(buffer, Charset.defaultCharset().toString());
     }
 
     /**
@@ -698,12 +698,20 @@ public abstract class Utils {
         return null;
     }
 
-    public static <S> S head(List<S> current) {
-        return current != null && current.size() > 0 ? current.get(0) : null;
-    }
 
     public static <S> List<S> tail(List<S> current) {
         return current != null && current.size() > 1 ? current.subList(1, current.size()) : Lists.<S>newArrayList();
+    }
+
+    public static <S> List<S> tail(Iterable<S> current) {
+        List<S> tail = Lists.newArrayList();
+        int i = 0;
+        for (S s : current) {
+            if (i > 0) tail.add(s);
+            i++;
+        }
+
+        return tail;
     }
 
     public static long write(GatheringByteChannel channel, ByteBuffer... byteBuffers) {
@@ -935,6 +943,12 @@ public abstract class Utils {
         }
     }
 
+    public static <V> void foreach(Iterator<V> coll, Callable1<V> func) {
+        while (coll.hasNext()) {
+            func.apply(coll.next());
+        }
+    }
+
 
     public static List<Integer> flatList(int from, int count) {
         return flatList(from, count, 1);
@@ -1032,8 +1046,14 @@ public abstract class Utils {
         return list;
     }
 
-    public static <T> List<T> take(List<T> items, int n) {
-        return n < items.size() ? items.subList(0, n) : items;
+    public static <T> List<T> take(Iterable<T> items, int n) {
+        List<T> list = Lists.newArrayList();
+        int num = 0;
+        for (T s : items) {
+            if (++num > n) break;
+            list.add(s);
+        }
+        return list;
     }
 
     public static <T> List<Tuple2<T, Integer>> zipWithIndex(List<T> values) {
@@ -1049,6 +1069,14 @@ public abstract class Utils {
     }
 
 
+    public static boolean forall(int from, int size, int step, Predicate<Integer> predicate) {
+        for (int i = from; i < from + size; i += step) {
+            if (!predicate.apply(i)) return false;
+        }
+
+        return true;
+
+    }
     public static <T> boolean forall(Iterable<T> coll, Predicate<T> predicate) {
         for(T t : coll) {
             if (!predicate.apply(t)) return false;
@@ -1065,5 +1093,29 @@ public abstract class Utils {
         }
 
         return -1;
+    }
+
+    public static <T> List<T> dropRight(List<T> list, int n) {
+        List<T> ret = Lists.newArrayList();
+
+        int i = 0;
+        int size = list.size();
+        for (T t : list) {
+            if (i + n <= size) break;
+            ret.add(t);
+        }
+
+        return ret;
+    }
+
+    public static List<Tuple2<Integer, Integer>> zip(int start, int num, int start1, int num1) {
+        List<Tuple2<Integer, Integer>> list = Lists.newArrayList();
+
+        for (int i = start, j = start1; i < start + num && j < start1 + num1; ++i, ++j) {
+            list.add(Tuple2.make(i, j));
+        }
+
+        return list;
+
     }
 }

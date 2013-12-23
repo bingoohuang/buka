@@ -69,15 +69,15 @@ public class Message {
     }
 
     public Message(byte[] bytes, byte[] key, CompressionCodec codec) {
-        this(bytes = bytes, key = key, codec = codec, /*payloadOffset =*/ 0, /*payloadSize =*/ -1);
+        this(bytes, key, codec, /*payloadOffset =*/ 0, /*payloadSize =*/ -1);
     }
 
     public Message(byte[] bytes, CompressionCodec codec) {
-        this(bytes = bytes, /*key = */null, codec = codec);
+        this(bytes, /*key = */null, codec = codec);
     }
 
     public Message(byte[] bytes, byte[] key) {
-        this(bytes = bytes, /*key = */key, /*codec = */NoCompressionCodec.instance);
+        this(bytes, /*key = */key, /*codec = */NoCompressionCodec.instance);
     }
 
     public Message(byte[] bytes) {

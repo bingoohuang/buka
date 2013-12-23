@@ -111,11 +111,11 @@ public class Cleaner {
      * @param expectedTruncateCount A count used to check if the log is being truncated and rewritten under our feet
      * @param deleteHorizonMs       The time to retain delete tombstones
      */
-    private void cleanSegments(Log log,
-                               List<LogSegment> segments,
-                               OffsetMap map,
-                               int expectedTruncateCount,
-                               long deleteHorizonMs) throws InterruptedException {
+    void cleanSegments(Log log,
+                       List<LogSegment> segments,
+                       OffsetMap map,
+                       int expectedTruncateCount,
+                       long deleteHorizonMs) throws InterruptedException {
         // create a new segment with the suffix .cleaned appended to both the log and index name
         File logFile = new File(Utils.head(segments).log.file.getPath() + Logs.CleanedFileSuffix);
         logFile.delete();
@@ -246,7 +246,7 @@ public class Cleaner {
      * @param maxIndexSize the maximum size in bytes for the total of all index data in a group
      * @return A list of grouped segments
      */
-    private List<List<LogSegment>> groupSegmentsBySize(Iterable<LogSegment> segments, int maxSize, int maxIndexSize) {
+    List<List<LogSegment>> groupSegmentsBySize(Iterable<LogSegment> segments, int maxSize, int maxIndexSize) {
         List<List<LogSegment>> grouped = Lists.newArrayList();
         List<LogSegment> segs = Lists.newArrayList(segments);
         while (!segs.isEmpty()) {
@@ -277,7 +277,7 @@ public class Cleaner {
      * @param map   The map in which to store the mappings
      * @return The final offset the map covers
      */
-    private long buildOffsetMap(Log log, long start, long end, OffsetMap map) throws InterruptedException {
+    long buildOffsetMap(Log log, long start, long end, OffsetMap map) throws InterruptedException {
         map.clear();
         Collection<LogSegment> dirty = log.logSegments(start, end);
         logger.info("Building offset map for log {} for {} segments in offset range [{}, {}).", log.name(), dirty.size(), start, end);

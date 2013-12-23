@@ -17,7 +17,7 @@ import static kafka.utils.TestUtils.tempFile;
 import static org.junit.Assert.assertEquals;
 
 public abstract class BaseMessageSetTestCases {
-    List<Message> messages = new ArrayList<Message>() {{
+    protected List<Message> messages = new ArrayList<Message>() {{
         add(new Message("abcd".getBytes()));
         add(new Message("efgh".getBytes()));
         add(new Message("ijkl".getBytes()));

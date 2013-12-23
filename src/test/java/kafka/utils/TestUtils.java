@@ -82,7 +82,7 @@ public class TestUtils {
      * Create a temporary file
      */
     public static File tempFile() {
-        File f = null;
+        File f;
         try {
             f = File.createTempFile("kafka", ".tmp");
         } catch (IOException e) {
