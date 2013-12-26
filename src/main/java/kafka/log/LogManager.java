@@ -174,12 +174,11 @@ public class LogManager {
     public void startup() {
     /* Schedule the cleanup task to delete old logs */
         if (scheduler != null) {
-            final LogManager lm = this;
             logger.info("Starting log cleanup with a period of {} ms.", retentionCheckMs);
             scheduler.schedule("kafka-log-retention", new Runnable() {
                 @Override
                 public void run() {
-                    lm.cleanupLogs();
+                    cleanupLogs();
                 }
             },
                     InitialTaskDelayMs,
@@ -189,7 +188,7 @@ public class LogManager {
             scheduler.schedule("kafka-log-flusher", new Runnable() {
                 @Override
                 public void run() {
-                    lm.flushDirtyLogs();
+                    flushDirtyLogs();
                 }
             },
                     InitialTaskDelayMs,
@@ -198,7 +197,7 @@ public class LogManager {
             scheduler.schedule("kafka-recovery-point-checkpoint", new Runnable() {
                 @Override
                 public void run() {
-                    lm.checkpointRecoveryPointOffsets();
+                    checkpointRecoveryPointOffsets();
                 }
             },
                     InitialTaskDelayMs,

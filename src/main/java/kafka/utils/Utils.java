@@ -4,8 +4,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.*;
 import kafka.common.KafkaException;
 import kafka.common.KafkaStorageException;
-import kafka.log.LogConfig;
-import kafka.log.LogSegment;
 import kafka.log.LogToClean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +18,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.Selector;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -424,9 +423,15 @@ public abstract class Utils {
      * Read some bytes into the provided buffer, and return the number of bytes read. If the
      * channel has been closed or we get -1 on the read for any reason, throw an EOFException
      */
-    public static int read(ReadableByteChannel channel, ByteBuffer buffer) throws IOException {
-        int read = channel.read(buffer);
-        if (read == -1) throw new EOFException("Received -1 when reading from channel, socket has likely been closed.");
+    public static int read(ReadableByteChannel channel, ByteBuffer buffer) {
+        int read;
+        try {
+            read = channel.read(buffer);
+            if (read == -1)
+                throw new EOFException("Received -1 when reading from channel, socket has likely been closed.");
+        } catch (IOException e) {
+            throw new KafkaException(e);
+        }
 
         return read;
     }
@@ -969,7 +974,7 @@ public abstract class Utils {
 
     public static <T> List<T> flatList(int from, int to, int by, Function1<Integer, T> fun) {
         List<T> ret = Lists.newArrayList();
-        for (int i = from; i < to; i+= by) {
+        for (int i = from; i < to; i += by) {
             ret.add(fun.apply(i));
         }
 
@@ -1027,7 +1032,7 @@ public abstract class Utils {
     }
 
     public static <S> S last(List<S> list) {
-        if( list.size() > 0 ) return list.get(list.size() - 1);
+        if (list.size() > 0) return list.get(list.size() - 1);
 
         throw new KafkaException("list is empty, last is not available");
     }
@@ -1037,7 +1042,7 @@ public abstract class Utils {
         return last(dirtyLogs);
     }
 
-    public static <A, B, T1, T2> List<Tuple2<T1, T2>> zip(List<A> lista, List<B> listb, Function2<A,B, Tuple2<T1, T2>> func) {
+    public static <A, B, T1, T2> List<Tuple2<T1, T2>> zip(List<A> lista, List<B> listb, Function2<A, B, Tuple2<T1, T2>> func) {
         List<Tuple2<T1, T2>> list = Lists.newArrayList();
         for (int i = 0, ii = lista.size(), jj = listb.size(); i < ii && i < jj; ++i) {
             list.add(func.apply(lista.get(i), listb.get(i)));
@@ -1059,9 +1064,10 @@ public abstract class Utils {
     public static <T> List<Tuple2<T, Integer>> zipWithIndex(List<T> values) {
         return zipWithIndex(values, 0);
     }
+
     public static <T> List<Tuple2<T, Integer>> zipWithIndex(List<T> values, int from) {
         List<Tuple2<T, Integer>> list = Lists.newArrayList();
-        for(int i = 0, ii = values.size(); i < ii; ++i) {
+        for (int i = 0, ii = values.size(); i < ii; ++i) {
             list.add(Tuple2.make(values.get(i), i + from));
         }
 
@@ -1077,8 +1083,9 @@ public abstract class Utils {
         return true;
 
     }
+
     public static <T> boolean forall(Iterable<T> coll, Predicate<T> predicate) {
-        for(T t : coll) {
+        for (T t : coll) {
             if (!predicate.apply(t)) return false;
         }
 
@@ -1087,7 +1094,7 @@ public abstract class Utils {
 
     public static <T> int indexWhere(Iterable<T> coll, Predicate<Integer> predicate) {
         int i = -1;
-        for(T t : coll) {
+        for (T t : coll) {
             ++i;
             if (predicate.apply(i)) return i;
         }
@@ -1117,5 +1124,13 @@ public abstract class Utils {
 
         return list;
 
+    }
+
+    public static int select(Selector selector, int timeout) {
+        try {
+            return selector.select(timeout);
+        } catch (IOException e) {
+            throw new KafkaException(e);
+        }
     }
 }

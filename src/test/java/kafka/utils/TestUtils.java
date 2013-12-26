@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.Callable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -388,5 +389,26 @@ public class TestUtils {
         } catch (IOException e) {
             throw new KafkaException(e);
         }
+    }
+
+
+    /**
+     * Wait until the given condition is true or the given wait time ellapses
+     */
+    public static boolean waitUntilTrue(Function0<Boolean> condition, long waitTime) {
+        long startTime = System.currentTimeMillis();
+        while (true) {
+            if (condition.apply())
+                return true;
+            if (System.currentTimeMillis() > startTime + waitTime)
+                return false;
+            try {
+                Thread.sleep(Math.min(waitTime, 100L));
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+        // should never hit here
+        // throw new RuntimeException("unexpected error");
     }
 }

@@ -20,7 +20,7 @@ public class RequestChannel extends KafkaMetricsGroup {
         this.queueSize = queueSize;
 
         requestQueue = new ArrayBlockingQueue<Request>(queueSize);
-        responseQueues = (BlockingQueue<Response>[]) new Object[numProcessors];
+        responseQueues = new BlockingQueue[numProcessors];
         for (int i = 0; i < numProcessors; ++i)
             responseQueues[i] = new LinkedBlockingQueue<Response>();
 

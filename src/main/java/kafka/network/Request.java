@@ -39,6 +39,8 @@ public class Request {
         this.buffer = buffer;
         this.startTimeMs = startTimeMs;
         this.remoteAddress = remoteAddress;
+
+        init();
     }
 
     volatile long requestDequeueTimeMs = -1L;
