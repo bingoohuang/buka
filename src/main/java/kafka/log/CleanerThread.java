@@ -36,7 +36,7 @@ public class CleanerThread extends Thread {
     private void init() {
         if (config.dedupeBufferSize / config.numThreads > Integer.MAX_VALUE)
             logger.warn("Cannot use more than 2G of cleaner buffer space per cleaner thread, ignoring excess buffer space...");
-        Cleaner cleaner = new Cleaner(threadId.getAndIncrement(),
+        cleaner = new Cleaner(threadId.getAndIncrement(),
                 new SkimpyOffsetMap((int) Math.min(config.dedupeBufferSize / config.numThreads, Integer.MAX_VALUE), config.hashAlgorithm),
                 /*ioBufferSize = */config.ioBufferSize / config.numThreads / 2,
                 /*maxIoBufferSize = */config.maxMessageSize,

@@ -145,6 +145,9 @@ public class LogCleaner {
      * For testing, a way to know when work has completed. This method blocks until the
      * cleaner has processed up to the given offset on the specified topic/partition
      */
+    public void awaitCleaned(String topic, int part, long offset) throws InterruptedException {
+        awaitCleaned(topic, part, offset, 30000L);
+    }
     public void awaitCleaned(String topic, int part, long offset, long timeout /* = 30000L*/) throws InterruptedException {
         while (!allCleanerCheckpoints().containsKey(new TopicAndPartition(topic, part)))
             cleaned.tryAcquire(timeout, TimeUnit.MILLISECONDS);

@@ -189,6 +189,9 @@ public class TestUtils {
         return singleMessageSet(payload, NoCompressionCodec.instance, null);
     }
 
+    public static ByteBufferMessageSet singleMessageSet(byte[] payload, byte[] key) {
+        return singleMessageSet(payload, NoCompressionCodec.instance, key);
+    }
     public static ByteBufferMessageSet singleMessageSet(byte[] payload, CompressionCodec codec, byte[] key) {
         return new ByteBufferMessageSet(codec, new Message(payload, key));
     }
