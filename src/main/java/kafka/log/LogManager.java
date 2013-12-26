@@ -13,9 +13,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 @ThreadSafe
 public class LogManager {
@@ -172,11 +174,12 @@ public class LogManager {
     public void startup() {
     /* Schedule the cleanup task to delete old logs */
         if (scheduler != null) {
+            final LogManager lm = this;
             logger.info("Starting log cleanup with a period of {} ms.", retentionCheckMs);
             scheduler.schedule("kafka-log-retention", new Runnable() {
                 @Override
                 public void run() {
-                    cleanupLogs();
+                    lm.cleanupLogs();
                 }
             },
                     InitialTaskDelayMs,
@@ -186,7 +189,7 @@ public class LogManager {
             scheduler.schedule("kafka-log-flusher", new Runnable() {
                 @Override
                 public void run() {
-                    flushDirtyLogs();
+                    lm.flushDirtyLogs();
                 }
             },
                     InitialTaskDelayMs,
@@ -195,7 +198,7 @@ public class LogManager {
             scheduler.schedule("kafka-recovery-point-checkpoint", new Runnable() {
                 @Override
                 public void run() {
-                    checkpointRecoveryPointOffsets();
+                    lm.checkpointRecoveryPointOffsets();
                 }
             },
                     InitialTaskDelayMs,
@@ -408,12 +411,17 @@ public class LogManager {
     private int cleanupSegmentsToMaintainSize(Log log) {
         if (log.config.retentionSize < 0 || log.size() < log.config.retentionSize) return 0;
 
-        final long diff = log.size() - log.config.retentionSize;
+        final AtomicLong diff = new AtomicLong(log.size() - log.config.retentionSize);
 
         return log.deleteOldSegments(new Predicate<LogSegment>() {
             @Override
             public boolean apply(LogSegment segment) {
-                return (diff - segment.size() >= 0);
+                if (diff.get() - segment.size() >= 0) {
+                    diff.addAndGet(-segment.size());
+                    return true;
+                } else {
+                    return false;
+                }
             }
         });
     }
@@ -438,7 +446,7 @@ public class LogManager {
     /**
      * Get all the partition logs
      */
-    public Iterable<Log> allLogs() {
+    public Collection<Log> allLogs() {
         return logs.values();
     }
 

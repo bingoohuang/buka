@@ -402,7 +402,7 @@ public class Log extends KafkaMetricsGroup implements Closeable {
         }
     }
 
-    public MessageSet read(Long startOffset, Integer maxLength) {
+    public MessageSet read(long startOffset, Integer maxLength) {
         return read(startOffset, maxLength, null);
     }
 

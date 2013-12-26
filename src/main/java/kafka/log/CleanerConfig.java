@@ -11,6 +11,7 @@ public class CleanerConfig {
     public boolean enableCleaner = true;
     public String hashAlgorithm = "MD5";
 
+
     /**
      * Configuration parameters for the log cleaner
      *
@@ -41,5 +42,8 @@ public class CleanerConfig {
         this.backOffMs = backOffMs;
         this.enableCleaner = enableCleaner;
         this.hashAlgorithm = hashAlgorithm;
+    }
+
+    public CleanerConfig() {
     }
 }

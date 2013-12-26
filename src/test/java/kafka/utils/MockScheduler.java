@@ -43,7 +43,7 @@ public class MockScheduler extends Scheduler {
     public void tick() {
         synchronized (this) {
             long now = time.milliseconds();
-            while (!tasks.isEmpty() && Utils.head(tasks).nextExecution <= now) {
+            while (!tasks.isEmpty() && tasks.peek().nextExecution <= now) {
         /* pop and execute the task with the lowest next execution time */
                 MockTask curr = tasks.poll();
                 curr.fun.run();

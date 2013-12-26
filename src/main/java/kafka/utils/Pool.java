@@ -4,10 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import kafka.common.KafkaException;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Pool<K, V> implements Iterable<Map.Entry<K,V>> {
@@ -80,7 +77,7 @@ public class Pool<K, V> implements Iterable<Map.Entry<K,V>> {
         return pool.keySet();
     }
 
-    public Iterable<V> values() {
+    public Collection<V> values() {
            return pool.values();
     }
 
