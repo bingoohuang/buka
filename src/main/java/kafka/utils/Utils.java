@@ -21,6 +21,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.Selector;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.Lock;
 
 /**
@@ -1132,5 +1133,34 @@ public abstract class Utils {
         } catch (IOException e) {
             throw new KafkaException(e);
         }
+    }
+
+    public static <T> T take(BlockingQueue<T> queue) {
+        try {
+            return queue.take();
+        } catch (InterruptedException e) {
+            throw new KafkaException(e);
+        }
+    }
+
+    public static <T> Set<T> filterSet(Set<T> sets, Predicate<T> predicate) {
+        Set<T> ret = Sets.newHashSet();
+
+        for (T t : sets) {
+            if (predicate.apply(t)) ret.add(t);
+        }
+
+        return ret;
+
+    }
+
+    public static <T> void put(BlockingQueue<T> queue, T item) {
+        try {
+            queue.put(item);
+        } catch (InterruptedException e) {
+            throw new KafkaException(e);
+        }
+
+
     }
 }
