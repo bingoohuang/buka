@@ -6,14 +6,17 @@ import java.util.Collection;
 
 public class ReassignedPartitionsContext {
     public final Collection<Integer> newReplicas;
-    public ReassignedPartitionsIsrChangeListener isrChangeListener;
+    public KafkaController.ReassignedPartitionsIsrChangeListener isrChangeListener;
 
     public ReassignedPartitionsContext() {
         this(Lists.<Integer>newArrayList(), null);
     }
 
+    public ReassignedPartitionsContext(Collection<Integer> newReplicas) {
+        this(newReplicas, null);
+    }
     public ReassignedPartitionsContext(Collection<Integer> newReplicas,
-                                       ReassignedPartitionsIsrChangeListener isrChangeListener) {
+                                       KafkaController.ReassignedPartitionsIsrChangeListener isrChangeListener) {
         this.newReplicas = newReplicas;
         this.isrChangeListener = isrChangeListener;
     }

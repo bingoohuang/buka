@@ -729,7 +729,6 @@ public abstract class Utils {
     }
 
     public static <T, K, V> Table<T, K, V> groupBy(Map<K, V> map, Function2<K, V, T> function) {
-
         Table<T, K, V> result = HashBasedTable.create();
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -738,6 +737,17 @@ public abstract class Utils {
 
         return result;
     }
+
+    public static <T, K, V> Table<T, K, Collection<V>> groupBy(Multimap<K, V> map, Function2<K, Collection<V>, T> function) {
+        Table<T, K, Collection<V>> result = HashBasedTable.create();
+
+        for (K key : map.keySet()) {
+            result.put(function.apply(key, map.get(key)), key, map.get(key));
+        }
+
+        return result;
+    }
+
 
     public static <K, V> Multimap<K, V> groupBy(Iterable<V> set, Function1<V, Tuple2<K, V>> function) {
         Multimap<K, V> result = HashMultimap.create();
@@ -796,6 +806,18 @@ public abstract class Utils {
         }
 
         return false;
+    }
+
+    public static <K, V, K1, V1> Multimap<K1, V1> map(Multimap<K, V> map, Function2<K, V, Tuple2<K1, V1>> func) {
+        Multimap<K1, V1> mm = HashMultimap.create();
+
+        for (Map.Entry<K, V> entry : map.entries()) {
+            Tuple2<K1, V1> apply = func.apply(entry.getKey(), entry.getValue());
+            mm.put(apply._1, apply._2);
+        }
+
+
+        return mm;
     }
 
     public static <K, V, K1, V1> Map<K1, V1> map(Map<K, V> map, Function2<K, V, Tuple2<K1, V1>> func) {
@@ -1019,6 +1041,39 @@ public abstract class Utils {
 
     }
 
+    public static <K, V> Multimap<K, V> filter(Multimap<K, V> coll, Predicate<Map.Entry<K, V>> predicate) {
+        Multimap<K, V> map = HashMultimap.create();
+        for (Map.Entry<K, V> s : coll.entries()) {
+            if (predicate.apply(s)) map.put(s.getKey(), s.getValue());
+        }
+        return map;
+    }
+
+    public static <K, V> Map<K, V> filter(Map<K, V> coll, Predicate<Map.Entry<K, V>> predicate) {
+        Map<K, V> map = Maps.newHashMap();
+        for (Map.Entry<K, V> s : coll.entrySet()) {
+            if (predicate.apply(s)) map.put(s.getKey(), s.getValue());
+        }
+        return map;
+    }
+
+    public static <K, V> Map<K, V> filter(Map<K, V> coll, Predicate2<K, V> predicate) {
+        Map<K, V> map = Maps.newHashMap();
+        for (Map.Entry<K, V> s : coll.entrySet()) {
+            if (predicate.apply(s.getKey(), s.getValue())) map.put(s.getKey(), s.getValue());
+        }
+        return map;
+    }
+
+    public static <K, V> Multimap<K, V> filter(Multimap<K, V> coll, Predicate2<K, Collection<V>> predicate) {
+        Multimap<K, V> map = HashMultimap.create();
+        for (K k : coll.keySet()) {
+            Collection<V> vs = coll.get(k);
+            if (predicate.apply(k, vs)) map.putAll(k, vs);
+        }
+        return map;
+    }
+
     public static <S> List<S> filter(Iterable<S> coll, Predicate<S> predicate) {
         List<S> list = Lists.newArrayList();
         for (S s : coll) {
@@ -1162,5 +1217,61 @@ public abstract class Utils {
         }
 
 
+    }
+
+    public static <K, V> V getOrElseUpdate(Map<K, V> map, K k, V v) {
+        V v1 = map.get(k);
+        if (v1 != null) return v1;
+
+        map.put(k, v);
+        return v;
+    }
+
+    public static <T> Set<T> minus(Set<T> from, Collection<T> substraction) {
+        Set<T> ret = Sets.newHashSet(from);
+        ret.removeAll(substraction);
+
+        return ret;
+    }
+
+    public static <K, V> void removeAll(Map<K, V> map, Set<K> keys) {
+        for (K k : keys) {
+            map.remove(k);
+        }
+    }
+
+    public static <K, V> Map<K, V> minus(Map<K, V> map, K k) {
+        Map<K, V> m = Maps.newHashMap(map);
+        m.remove(k);
+        return m;
+    }
+
+    public static <K, V, V1> Multimap<K, V> mapValues(Map<K, V1> map, Function1<V1, Collection<V>> function1) {
+        Multimap<K, V> m = HashMultimap.create();
+
+        for (Map.Entry<K, V1> entry : map.entrySet()) {
+            m.putAll(entry.getKey(), function1.apply(entry.getValue()));
+        }
+
+
+        return m;
+    }
+
+    public static <K, V> Multimap<K, V> multimap(Map<K, Collection<V>> map) {
+        Multimap<K, V> m = HashMultimap.create();
+
+        for (Map.Entry<K, Collection<V>> entry : map.entrySet()) {
+            m.putAll(entry.getKey(), entry.getValue());
+        }
+
+        return m;
+    }
+
+    public static <T> Set<T> and(Set<T> set, Collection<T> all) {
+        Set<T> result = Sets.newHashSet(set);
+
+        result.addAll(all);
+
+        return result;
     }
 }

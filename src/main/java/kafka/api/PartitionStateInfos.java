@@ -1,7 +1,7 @@
 package kafka.api;
 
+import kafka.controller.LeaderIsrAndControllerEpoch;
 import kafka.utils.Function1;
-import kafka.utils.LeaderIsrAndControllerEpoch;
 import kafka.utils.Utils;
 
 import java.nio.ByteBuffer;

@@ -15,6 +15,7 @@ import kafka.common.TopicAndPartition;
 import kafka.consumer.TopicCount;
 import kafka.consumer.TopicCounts;
 import kafka.controller.KafkaControllers;
+import kafka.controller.LeaderIsrAndControllerEpoch;
 import kafka.controller.PartitionAndReplica;
 import kafka.controller.ReassignedPartitionsContext;
 import org.I0Itec.zkclient.ZkClient;
@@ -509,7 +510,7 @@ public abstract class ZkUtils {
     }
 
     public static Map<TopicAndPartition, LeaderIsrAndControllerEpoch>
-    getPartitionLeaderAndIsrForTopics(ZkClient zkClient, List<TopicAndPartition> topicAndPartitions) {
+    getPartitionLeaderAndIsrForTopics(ZkClient zkClient, Set<TopicAndPartition> topicAndPartitions) {
         Map<TopicAndPartition, LeaderIsrAndControllerEpoch> ret = Maps.newHashMap();
         for (TopicAndPartition topicAndPartition : topicAndPartitions) {
             LeaderIsrAndControllerEpoch leaderIsrAndControllerEpoch = ZkUtils.getLeaderIsrAndEpochForPartition(zkClient,

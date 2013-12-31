@@ -28,6 +28,10 @@ public class KafkaScheduler extends Scheduler {
         this.daemon = daemon;
     }
 
+    public KafkaScheduler(int threads) {
+        this(threads, "kafka-scheduler-", true);
+    }
+
     volatile private ScheduledThreadPoolExecutor executor = null;
     private AtomicInteger schedulerThreadId = new AtomicInteger(0);
 

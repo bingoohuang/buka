@@ -9,7 +9,7 @@ public class LeaderAndIsr {
     public final int leader;
     public final int leaderEpoch;
     public final List<Integer> isr;
-    public final int zkVersion;
+    public int zkVersion;
 
     public LeaderAndIsr(int leader, int leaderEpoch, List<Integer> isr, int zkVersion) {
         this.leader = leader;

@@ -1,10 +1,11 @@
 package kafka.admin;
 
-import com.google.common.collect.ImmutableSet;
 import kafka.common.TopicAndPartition;
 
+import java.util.Set;
+
 public class PreferredReplicaLeaderElectionCommands {
-    public static ImmutableSet<TopicAndPartition> parsePreferredReplicaElectionData(String jsonString) {
+    public static Set<TopicAndPartition> parsePreferredReplicaElectionData(String jsonString) {
         return null;
     }
 }
