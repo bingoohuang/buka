@@ -3,7 +3,7 @@ package kafka.controller;
 import com.google.common.base.Predicate;
 import com.google.common.collect.*;
 import com.yammer.metrics.core.Gauge;
-import kafka.admin.PreferredReplicaLeaderElectionCommands;
+import kafka.admin.PreferredReplicaLeaderElectionCommand;
 import kafka.api.LeaderAndIsr;
 import kafka.api.RequestOrResponse;
 import kafka.common.*;
@@ -1149,7 +1149,7 @@ public class KafkaController extends KafkaMetricsGroup implements KafkaControlle
                                 logger.info("Created preferred replica election path with {}", jsonData);
                             } catch (ZkNodeExistsException e) {
                                 Set<TopicAndPartition> partitionsUndergoingPreferredReplicaElection =
-                                        PreferredReplicaLeaderElectionCommands.parsePreferredReplicaElectionData(ZkUtils.readData(zkClient, zkPath)._1);
+                                        PreferredReplicaLeaderElectionCommand.parsePreferredReplicaElectionData(ZkUtils.readData(zkClient, zkPath)._1);
                                 logger.error("Preferred replica leader election currently in progress for " +
                                         "{}. Aborting operation", partitionsUndergoingPreferredReplicaElection);
                             } catch (Throwable e) {
@@ -1309,7 +1309,7 @@ public class KafkaController extends KafkaMetricsGroup implements KafkaControlle
         public void handleDataChange(String dataPath, Object data) throws Exception {
             logger.debug("Preferred replica election listener fired for path {}. Record partitions to undergo preferred replica election {}",
                     dataPath, data.toString());
-            Set<TopicAndPartition> partitionsForPreferredReplicaElection = PreferredReplicaLeaderElectionCommands.parsePreferredReplicaElectionData(data.toString());
+            Set<TopicAndPartition> partitionsForPreferredReplicaElection = PreferredReplicaLeaderElectionCommand.parsePreferredReplicaElectionData(data.toString());
 
             synchronized (controllerContext.controllerLock) {
                 logger.info("These partitions are already undergoing preferred replica election: {}",

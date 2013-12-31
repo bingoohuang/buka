@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.*;
 import kafka.admin.AdminOperationException;
-import kafka.admin.PreferredReplicaLeaderElectionCommands;
+import kafka.admin.PreferredReplicaLeaderElectionCommand;
 import kafka.api.LeaderAndIsr;
 import kafka.cluster.Broker;
 import kafka.cluster.Brokers;
@@ -748,7 +748,7 @@ public abstract class ZkUtils {
 
         if (jsonPartitionList == null) return ret;
 
-        return PreferredReplicaLeaderElectionCommands.parsePreferredReplicaElectionData(jsonPartitionList);
+        return PreferredReplicaLeaderElectionCommand.parsePreferredReplicaElectionData(jsonPartitionList);
     }
 
     public static void deletePartition(ZkClient zkClient, int brokerId, String topic) {

@@ -69,7 +69,7 @@ public class LogConfigs {
     /**
      * Check that property names are valid
      */
-    public void validateNames(Properties props) {
+    public static void validateNames(Properties props) {
         for (Object name : props.keySet())
             checkState(ConfigNames.contains(name), String.format("Unknown configuration \"%s\".", name));
     }
@@ -77,7 +77,7 @@ public class LogConfigs {
     /**
      * Check that the given properties contain only valid log config names, and that all values can be parsed.
      */
-    public void validate(Properties props) {
+    public static void validate(Properties props) {
         validateNames(props);
         fromProps(new LogConfig().toProps(), props); // check that we can parse the values
     }

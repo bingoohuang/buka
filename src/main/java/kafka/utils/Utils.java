@@ -12,6 +12,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import java.io.*;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
@@ -808,17 +809,28 @@ public abstract class Utils {
         return false;
     }
 
-    public static <K, V, K1, V1> Multimap<K1, V1> map(Multimap<K, V> map, Function2<K, V, Tuple2<K1, V1>> func) {
+    public static <K, V, K1, V1> Multimap<K1, V1> map(Multimap<K, V> map, Function2<K, Collection<V>, Tuple2<K1, Collection<V1>>> func) {
         Multimap<K1, V1> mm = HashMultimap.create();
 
-        for (Map.Entry<K, V> entry : map.entries()) {
-            Tuple2<K1, V1> apply = func.apply(entry.getKey(), entry.getValue());
-            mm.put(apply._1, apply._2);
+        for (K key : map.keySet()) {
+            Tuple2<K1, Collection<V1>> apply = func.apply(key, map.get(key));
+            mm.putAll(apply._1, apply._2);
         }
-
 
         return mm;
     }
+
+//    public static <K, V, K1, V1> Multimap<K1, V1> map(Multimap<K, V> map, Function2<K, V, Tuple2<K1, V1>> func) {
+//        Multimap<K1, V1> mm = HashMultimap.create();
+//
+//        for (Map.Entry<K, V> entry : map.entries()) {
+//            Tuple2<K1, V1> apply = func.apply(entry.getKey(), entry.getValue());
+//            mm.put(apply._1, apply._2);
+//        }
+//
+//
+//        return mm;
+//    }
 
     public static <K, V, K1, V1> Map<K1, V1> map(Map<K, V> map, Function2<K, V, Tuple2<K1, V1>> func) {
         Map<K1, V1> ret = Maps.newHashMap();
@@ -878,6 +890,15 @@ public abstract class Utils {
         Set<V1> v1s = Sets.newHashSet();
         for (V v : coll) {
             V1 v1 = func.apply(v);
+            v1s.add(v1);
+        }
+        return v1s;
+    }
+
+    public static <K, V, V1> Set<V1> mapSet(Multimap<K, V> coll, Function2<K, Collection<V>, V1> func) {
+        Set<V1> v1s = Sets.newHashSet();
+        for (K k : coll.keySet()) {
+            V1 v1 = func.apply(k, coll.get(k));
             v1s.add(v1);
         }
         return v1s;
@@ -1271,6 +1292,54 @@ public abstract class Utils {
         Set<T> result = Sets.newHashSet(set);
 
         result.addAll(all);
+
+        return result;
+    }
+
+    public static <K, V> Tuple2<K, Collection<V>> head(Multimap<K, V> mm) {
+        for (K k : mm.keySet()) {
+            return Tuple2.make(k, mm.get(k));
+        }
+
+        return null;
+    }
+
+    public static <T> T[] takeRight(T[] list, int size) {
+        if (size >= list.length) {
+            return list;
+        }
+
+        T[] ret = (T[]) Array.newInstance(list[0].getClass(), size);
+        int offset = list.length - size;
+        for (int i = offset; i < list.length; ++i) {
+            ret[i-offset] = list[i];
+        }
+
+        return ret;
+    }
+
+    public static <T> boolean subsetOf(Set<T> set1, Set<T> set2) {
+        Set<T> set = Sets.newHashSet(set1);
+
+        set.removeAll(set2);
+
+        return set.isEmpty();
+    }
+
+    public static <K,V> List<Tuple2<K, Collection<V>>> toList(Multimap<K,V> mm) {
+        List<Tuple2<K, Collection<V>>> list = Lists.newArrayList();
+
+        for (K k : mm.keySet()) {
+            list.add(Tuple2.make(k, mm.get(k)));
+        }
+
+        return list;
+    }
+
+    public static <T> List<T> sortWith(List<T> list, Comparator<T> comparator) {
+        List<T> result = Lists.newArrayList(list);
+
+        Collections.sort(result, comparator);
 
         return result;
     }
