@@ -169,6 +169,12 @@ public class AdminUtils {
     public static void createOrUpdateTopicPartitionAssignmentPathInZK(ZkClient zkClient,
                                                                       String topic,
                                                                       final Multimap<Integer, Integer> partitionReplicaAssignment,
+                                                                      Properties config /*= new Properties*/) {
+        createOrUpdateTopicPartitionAssignmentPathInZK(zkClient, topic, partitionReplicaAssignment, config, false);
+    }
+    public static void createOrUpdateTopicPartitionAssignmentPathInZK(ZkClient zkClient,
+                                                                      String topic,
+                                                                      final Multimap<Integer, Integer> partitionReplicaAssignment,
                                                                       Properties config /*= new Properties*/,
                                                                       boolean update/* = false*/) {
         // validate arguments

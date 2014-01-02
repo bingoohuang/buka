@@ -886,6 +886,15 @@ public abstract class Utils {
         return v1s;
     }
 
+    public static <K, V, V1> List<V1> mapList(Multimap<K, V> coll, Function2<K, Collection<V>, V1> func) {
+        List<V1> v1s = Lists.newArrayList();
+        for (K k : coll.keySet()) {
+            V1 v1 = func.apply(k, coll.get(k));
+            v1s.add(v1);
+        }
+        return v1s;
+    }
+
     public static <V, V1> Set<V1> mapSet(Collection<V> coll, Function1<V, V1> func) {
         Set<V1> v1s = Sets.newHashSet();
         for (V v : coll) {
@@ -1312,7 +1321,7 @@ public abstract class Utils {
         T[] ret = (T[]) Array.newInstance(list[0].getClass(), size);
         int offset = list.length - size;
         for (int i = offset; i < list.length; ++i) {
-            ret[i-offset] = list[i];
+            ret[i - offset] = list[i];
         }
 
         return ret;
@@ -1326,7 +1335,7 @@ public abstract class Utils {
         return set.isEmpty();
     }
 
-    public static <K,V> List<Tuple2<K, Collection<V>>> toList(Multimap<K,V> mm) {
+    public static <K, V> List<Tuple2<K, Collection<V>>> toList(Multimap<K, V> mm) {
         List<Tuple2<K, Collection<V>>> list = Lists.newArrayList();
 
         for (K k : mm.keySet()) {
@@ -1342,5 +1351,14 @@ public abstract class Utils {
         Collections.sort(result, comparator);
 
         return result;
+    }
+
+    public static <T> int count(Iterable<T> iterable, Predicate<T> predicate) {
+        int count = 0;
+        for (T t : iterable) {
+            if (predicate.apply(t)) ++count;
+        }
+
+        return count;
     }
 }
