@@ -861,10 +861,9 @@ public class KafkaController extends KafkaMetricsGroup implements KafkaControlle
                                                    Multimap<TopicAndPartition, Integer> newReplicaAssignmentForTopic) {
         try {
             String zkPath = ZkUtils.getTopicPath(topicAndPartition.topic);
-            String jsonPartitionMap = ZkUtils.replicaAssignmentZkData(Utils.map(newReplicaAssignmentForTopic, new Function2<TopicAndPartition, Integer, Tuple2<String, Integer>>() {
-
+            String jsonPartitionMap = ZkUtils.replicaAssignmentZkData(Utils.map(newReplicaAssignmentForTopic,new Function2<TopicAndPartition, Collection<Integer>, Tuple2<String, Collection<Integer>>>() {
                 @Override
-                public Tuple2<String, Integer> apply(TopicAndPartition _1, Integer _2) {
+                public Tuple2<String, Collection<Integer>> apply(TopicAndPartition _1, Collection<Integer> _2) {
                     return Tuple2.make(_1.partition + "", _2);
                 }
             }));

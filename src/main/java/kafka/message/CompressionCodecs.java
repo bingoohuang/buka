@@ -1,8 +1,6 @@
 package kafka.message;
 
 
-import java.text.MessageFormat;
-
 public abstract class CompressionCodecs {
     public static CompressionCodec getCompressionCodec(int codec) {
         if (codec == NoCompressionCodec.instance.codec()) return NoCompressionCodec.instance;

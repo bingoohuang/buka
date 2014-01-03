@@ -1361,4 +1361,13 @@ public abstract class Utils {
 
         return count;
     }
+
+    public static <T1, T> List<T> zipWithIndex(List<T1> list, Function2<T1, Integer, T> function2) {
+        List<T> result = Lists.newArrayList();
+        for (int i = 0, ii = list.size(); i < ii; ++i) {
+            result.add(function2.apply(list.get(i), i));
+        }
+
+        return result;
+    }
 }
