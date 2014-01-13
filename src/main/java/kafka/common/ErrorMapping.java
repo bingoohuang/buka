@@ -61,12 +61,12 @@ public abstract class ErrorMapping {
 
     static Logger logger = LoggerFactory.getLogger(ErrorMapping.class);
 
-    public static Throwable exceptionFor(Short code) {
+    public static KafkaException exceptionFor(Short code) {
         Class<? extends Throwable> throwable = exceptionToCode.inverse().get(code);
         if (throwable == null) return null;
 
         try {
-            return throwable.newInstance();
+            return (KafkaException) throwable.newInstance();
         } catch (Exception e) {
             logger.error("create instance of {} error", throwable, e);
         }

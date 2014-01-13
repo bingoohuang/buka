@@ -54,6 +54,10 @@ public class OffsetRequest extends RequestOrResponse {
 
     Table<String, TopicAndPartition, PartitionOffsetRequestInfo> requestInfoGroupedByTopic;
 
+    public OffsetRequest(Map<TopicAndPartition, PartitionOffsetRequestInfo> requestInfo, String clientId, int consumerId) {
+        this(requestInfo, OffsetRequestReader.CurrentVersion, 0, clientId, consumerId);
+    }
+
     @Override
     public int sizeInBytes() {
         return 2 + /* versionId */

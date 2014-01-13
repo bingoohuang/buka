@@ -28,6 +28,9 @@ public class KafkaScheduler extends Scheduler {
         this.daemon = daemon;
     }
 
+    public KafkaScheduler(int threads, String threadNamePrefix) {
+        this(threads, threadNamePrefix, true);
+    }
     public KafkaScheduler(int threads) {
         this(threads, "kafka-scheduler-", true);
     }

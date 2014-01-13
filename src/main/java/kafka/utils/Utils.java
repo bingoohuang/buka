@@ -1,9 +1,18 @@
 package kafka.utils;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.*;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
 import kafka.common.KafkaException;
 import kafka.common.KafkaStorageException;
+import kafka.consumer.ConsoleConsumer;
+import kafka.consumer.FetchedDataChunk;
 import kafka.log.LogToClean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +32,10 @@ import java.nio.channels.Selector;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * General helper functions!
@@ -405,17 +417,11 @@ public abstract class Utils {
     /**
      * Group the given values by keys extracted with the given function
      */
-    public static <K, V> Map<K, List<V>> groupby(Iterable<V> vals, Function1<V, K> f) {
-        Map<K, List<V>> m = new HashMap<K, List<V>>();
+    public static <K, V> Multimap<K, V> groupby(Iterable<V> vals, Function1<V, K> f) {
+        Multimap<K, V> m = HashMultimap.create();
         for (V v : vals) {
             K k = f.apply(v);
-            List<V> vs = m.get(k);
-            if (vs != null) vs.add(0, v);
-            else {
-                vs = new LinkedList<V>();
-                vs.add(v);
-                m.put(k, vs);
-            }
+            m.put(k, v);
         }
 
         return m;
@@ -650,6 +656,15 @@ public abstract class Utils {
         }
     }
 
+    public static void inLock(Lock lock, Callable0 fun) {
+        lock.lock();
+        try {
+            fun.apply();
+        } finally {
+            lock.unlock();
+        }
+    }
+
     public static void readChannel(FileChannel channel, ByteBuffer buffer, int position) {
         try {
             channel.read(buffer, position);
@@ -792,7 +807,7 @@ public abstract class Utils {
         return foldingValue;
     }
 
-    public static <T, R> R foldLeft(Collection<T> values, R initValue, Function2<R, T, R> foldFunction) {
+    public static <T, R> R foldLeft(Iterable<T> values, R initValue, Function2<R, T, R> foldFunction) {
         R foldingValue = initValue;
         for (T value : values) {
             foldingValue = foldFunction.apply(foldingValue, value);
@@ -873,6 +888,15 @@ public abstract class Utils {
         for (V v : coll) {
             V1 v1 = func.apply(v);
             v1s.add(v1);
+        }
+        return v1s;
+    }
+
+    public static <V, V1> List<V1> mapLists(Iterable<V> coll, Function1<V, Collection<V1>> func) {
+        List<V1> v1s = Lists.newArrayList();
+        for (V v : coll) {
+            Collection<V1> vs = func.apply(v);
+            v1s.addAll(vs);
         }
         return v1s;
     }
@@ -1128,6 +1152,15 @@ public abstract class Utils {
         return last(dirtyLogs);
     }
 
+    public static <A, B> List<Tuple2<A, B>> zip(List<A> lista, List<B> listb) {
+        List<Tuple2<A, B>> list = Lists.newArrayList();
+        for (int i = 0, ii = lista.size(), jj = listb.size(); i < ii && i < jj; ++i) {
+            list.add(Tuple2.make(lista.get(i), listb.get(i)));
+        }
+
+        return list;
+    }
+
     public static <A, B, T1, T2> List<Tuple2<T1, T2>> zip(List<A> lista, List<B> listb, Function2<A, B, Tuple2<T1, T2>> func) {
         List<Tuple2<T1, T2>> list = Lists.newArrayList();
         for (int i = 0, ii = lista.size(), jj = listb.size(); i < ii && i < jj; ++i) {
@@ -1369,5 +1402,57 @@ public abstract class Utils {
         }
 
         return result;
+    }
+
+    public static void await(Condition condition, long l, TimeUnit timeUnit) {
+        try {
+            condition.await(l, timeUnit);
+        } catch (InterruptedException e) {
+            throw new KafkaException(e);
+        }
+    }
+
+    public static void lockInterruptibly(ReentrantLock reentrantLock) {
+        try {
+            reentrantLock.lockInterruptibly();
+        } catch (InterruptedException e) {
+            throw new KafkaException(e);
+        }
+    }
+
+    public static void await(Condition cond) {
+        try {
+            cond.await();
+        } catch (InterruptedException e) {
+            throw new KafkaException(e);
+        }
+    }
+
+    public static void sleep(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+    }
+
+    public static String getHostName() {
+        return "TODO";
+    }
+
+    public static <T> T poll(BlockingQueue<T> channel, int timeoutMs, TimeUnit timeunit) {
+        try {
+            return channel.poll(timeoutMs, timeunit);
+        } catch (InterruptedException e) {
+            throw new KafkaException(e);
+        }
+    }
+
+    public static <T> T newInstance(Class<?> clazz) {
+        try {
+            return (T) clazz.newInstance();
+        } catch (Exception e) {
+            throw new KafkaException(e);
+        }
     }
 }
